@@ -1,0 +1,1380 @@
+#Requires -Version 7.0
+Set-StrictMode -Off
+<#
+.SYNOPSIS
+  Moodle target layer for UCKK Médiathèque.
+
+.DESCRIPTION
+  This module handles Moodle-side Médiathèque operations:
+    - validate local/server Moodle target settings;
+    - build a safe payload for Moodle CLI;
+    - run a temporary Moodle PHP helper;
+    - verify Médiathèque tables and counters;
+    - simulate changes;
+    - apply changes after confirmation by caller.
+
+  This module must not:
+    - read the manifest directly unless a caller passes a manifest path;
+    - decide UI confirmations;
+    - write reports directly;
+    - write logs directly;
+    - call legacy/recovery scripts;
+    - use public exports as normal source of truth;
+    - perform wipe/rebuild operations.
+
+  Normal workflow:
+    manifeste → simulation → appliquer → vérifier
+#>
+
+function New-UckkMediathequeMoodleResult {
+    [CmdletBinding()]
+    param(
+        [bool]$Success = $false,
+        [string]$Status = "Échoué",
+        [string]$Action = "Médiathèque Moodle",
+        [string]$Target = "Médiathèque",
+        [int]$DangerLevel = 1,
+        [string]$Mode = "vérification",
+        [string]$Summary = "",
+        [string[]]$Warnings = @(),
+        [string[]]$Errors = @(),
+        [string]$NextStep = "",
+        [object]$Data = $null
+    )
+
+    if (Get-Command -Name New-UckkActionResult -ErrorAction SilentlyContinue) {
+        return New-UckkActionResult `
+            -Success $Success `
+            -Status $Status `
+            -Action $Action `
+            -Domain "mediatheque" `
+            -Target $Target `
+            -DangerLevel $DangerLevel `
+            -Mode $Mode `
+            -Summary $Summary `
+            -Warnings $Warnings `
+            -Errors $Errors `
+            -NextStep $NextStep `
+            -ReportPath "" `
+            -LogPath "" `
+            -Data $Data
+    }
+
+    return [pscustomobject]@{
+        success     = $Success
+        status      = $Status
+        action      = $Action
+        domain      = "mediatheque"
+        target      = $Target
+        dangerLevel = $DangerLevel
+        mode        = $Mode
+        summary     = $Summary
+        warnings    = $Warnings
+        errors      = $Errors
+        nextStep    = $NextStep
+        reportPath  = ""
+        logPath     = ""
+        data        = $Data
+    }
+}
+
+function Get-UckkObjectValue {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [object]$Object,
+
+        [Parameter(Mandatory)]
+        [string]$Path,
+
+        [object]$Default = $null
+    )
+
+    $current = $Object
+
+    foreach ($part in $Path.Split(".")) {
+        if ($null -eq $current) {
+            return $Default
+        }
+
+        if ($current -is [hashtable]) {
+            if (-not $current.ContainsKey($part)) {
+                return $Default
+            }
+
+            $current = $current[$part]
+            continue
+        }
+
+        if ($current.PSObject.Properties.Name -notcontains $part) {
+            return $Default
+        }
+
+        $current = $current.$part
+    }
+
+    if ($null -eq $current) {
+        return $Default
+    }
+
+    return $current
+}
+
+function Get-UckkMediathequeMoodleTableNames {
+    [CmdletBinding()]
+    param()
+
+    return @(
+        "uckkarchive_external_work",
+        "uckkarchive_media",
+        "uckkarchive_media_source",
+        "uckkarchive_media_tag",
+        "uckkarchive_media_collection",
+        "uckkarchive_media_collection_item"
+    )
+}
+
+function Get-UckkMediathequeTargetSettings {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [object]$Config,
+
+        [Parameter(Mandatory)]
+        [ValidateSet("local", "server")]
+        [string]$Target
+    )
+
+    $isServer = $Target -eq "server"
+
+    $moodleRoot = if ($isServer) {
+        [string](Get-UckkObjectValue -Object $Config -Path "paths.serverMoodleRoot" -Default "")
+    } else {
+        [string](Get-UckkObjectValue -Object $Config -Path "paths.localMoodleRoot" -Default "")
+    }
+
+    $moodleRuntime = if ($isServer) {
+        [string](Get-UckkObjectValue -Object $Config -Path "paths.serverMoodleRuntime" -Default "")
+    } else {
+        [string](Get-UckkObjectValue -Object $Config -Path "paths.localMoodleRuntime" -Default "")
+    }
+
+    $baseUrl = if ($isServer) {
+        [string](Get-UckkObjectValue -Object $Config -Path "urls.serverBase" -Default "")
+    } else {
+        [string](Get-UckkObjectValue -Object $Config -Path "urls.localBase" -Default "")
+    }
+
+    $mediathequeUrl = if ($isServer) {
+        [string](Get-UckkObjectValue -Object $Config -Path "urls.serverMediatheque" -Default "")
+    } else {
+        [string](Get-UckkObjectValue -Object $Config -Path "urls.localMediatheque" -Default "")
+    }
+
+    $phpPath = if ($isServer) {
+        [string](Get-UckkObjectValue -Object $Config -Path "moodle.serverPhpPath" -Default "php")
+    } else {
+        [string](Get-UckkObjectValue -Object $Config -Path "moodle.localPhpPath" -Default "php")
+    }
+
+    $archiveId = if ($isServer) {
+        [int](Get-UckkObjectValue -Object $Config -Path "mediatheque.serverArchiveId" -Default 0)
+    } else {
+        [int](Get-UckkObjectValue -Object $Config -Path "mediatheque.localArchiveId" -Default 0)
+    }
+
+    $courseId = if ($isServer) {
+        [int](Get-UckkObjectValue -Object $Config -Path "mediatheque.serverCourseId" -Default 0)
+    } else {
+        [int](Get-UckkObjectValue -Object $Config -Path "mediatheque.localCourseId" -Default 0)
+    }
+
+    $cmId = if ($isServer) {
+        [int](Get-UckkObjectValue -Object $Config -Path "mediatheque.serverCmId" -Default 0)
+    } else {
+        [int](Get-UckkObjectValue -Object $Config -Path "mediatheque.localCmId" -Default 0)
+    }
+
+    $contextId = if ($isServer) {
+        [int](Get-UckkObjectValue -Object $Config -Path "mediatheque.serverContextId" -Default 0)
+    } else {
+        [int](Get-UckkObjectValue -Object $Config -Path "mediatheque.localContextId" -Default 0)
+    }
+
+    $serviceName = [string](Get-UckkObjectValue -Object $Config -Path "mediatheque.serviceName" -Default "mod_uckkarchive_search_mediatheque")
+
+    return [pscustomobject]@{
+        target          = $Target
+        isServer        = $isServer
+        moodleRoot      = $moodleRoot
+        moodleRuntime   = $moodleRuntime
+        phpPath         = $phpPath
+        baseUrl         = $baseUrl
+        mediathequeUrl  = $mediathequeUrl
+        archiveId       = $archiveId
+        courseId        = $courseId
+        cmId            = $cmId
+        contextId       = $contextId
+        serviceName     = $serviceName
+        tableNames      = Get-UckkMediathequeMoodleTableNames
+    }
+}
+
+function Test-UckkMediathequeTargetSettings {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [object]$Settings
+    )
+
+    $errors = @()
+    $warnings = @()
+
+    if ([string]::IsNullOrWhiteSpace($Settings.moodleRoot)) {
+        $errors += "Chemin Moodle root manquant."
+    }
+
+    if ([string]::IsNullOrWhiteSpace($Settings.moodleRuntime)) {
+        $warnings += "Chemin runtime Moodle manquant."
+    }
+
+    if ([string]::IsNullOrWhiteSpace($Settings.phpPath)) {
+        $errors += "Chemin PHP manquant."
+    }
+
+    if ([string]::IsNullOrWhiteSpace($Settings.serviceName)) {
+        $errors += "Nom du service Médiathèque manquant."
+    }
+
+    if ($Settings.archiveId -le 0) {
+        $errors += "archiveId Médiathèque manquant ou invalide."
+    }
+
+    if ($Settings.courseId -le 0) {
+        $errors += "courseId Médiathèque manquant ou invalide."
+    }
+
+    if ($Settings.cmId -le 0) {
+        $errors += "cmId Médiathèque manquant ou invalide."
+    }
+
+    if ($Settings.contextId -le 0) {
+        $errors += "contextId Médiathèque manquant ou invalide."
+    }
+
+    if ($Settings.target -eq "local") {
+        if (-not [string]::IsNullOrWhiteSpace($Settings.moodleRoot) -and -not (Test-Path -LiteralPath $Settings.moodleRoot)) {
+            $errors += "Moodle root local introuvable : $($Settings.moodleRoot)"
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($Settings.moodleRuntime) -and -not (Test-Path -LiteralPath $Settings.moodleRuntime)) {
+            $warnings += "Runtime Moodle local introuvable : $($Settings.moodleRuntime)"
+        }
+    }
+
+    if ($errors.Count -gt 0) {
+        return New-UckkMediathequeMoodleResult `
+            -Success $false `
+            -Status "Échoué" `
+            -Action "Vérifier cible Médiathèque Moodle" `
+            -Target $Settings.target `
+            -DangerLevel 1 `
+            -Mode "vérification" `
+            -Summary "L’action a échoué." `
+            -Warnings $warnings `
+            -Errors $errors `
+            -NextStep "Corriger la configuration Médiathèque avant de continuer." `
+            -Data $Settings
+    }
+
+    return New-UckkMediathequeMoodleResult `
+        -Success $true `
+        -Status $(if ($warnings.Count -gt 0) { "Réussi avec avertissements" } else { "Réussi" }) `
+        -Action "Vérifier cible Médiathèque Moodle" `
+        -Target $Settings.target `
+        -DangerLevel 1 `
+        -Mode "vérification" `
+        -Summary "Réussi — la cible Médiathèque Moodle est configurée." `
+        -Warnings $warnings `
+        -Errors @() `
+        -NextStep "Lancer une simulation Médiathèque avant toute application." `
+        -Data $Settings
+}
+
+function ConvertTo-UckkMediathequeMoodlePayload {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [ValidateSet("verify", "simulate", "apply")]
+        [string]$Operation,
+
+        [Parameter(Mandatory)]
+        [object]$Settings,
+
+        [string]$ManifestPath = "",
+
+        [object[]]$Entries = @(),
+
+        [switch]$AllowPartialSource,
+
+        [int]$MinimumExpectedCount = 0
+    )
+
+    $manifestObject = [ordered]@{
+        path    = $ManifestPath
+        entries = @()
+    }
+
+    if ($Entries.Count -gt 0) {
+        $manifestObject.entries = $Entries
+    }
+
+    return [pscustomobject]@{
+        operation            = $Operation
+        generatedAt          = (Get-Date).ToString("o")
+        allowPartialSource   = [bool]$AllowPartialSource
+        minimumExpectedCount = $MinimumExpectedCount
+        target               = $Settings
+        manifest             = $manifestObject
+    }
+}
+
+function New-UckkMediathequeMoodlePhpHelper {
+    [CmdletBinding()]
+    param()
+
+    return @'
+<?php
+define('CLI_SCRIPT', true);
+if ($argc < 2) {
+    fwrite(STDERR, "Missing payload path\n");
+    exit(2);
+}
+
+$payloadpath = $argv[1];
+
+if (!is_readable($payloadpath)) {
+    fwrite(STDERR, "Payload file is not readable: {$payloadpath}\n");
+    exit(2);
+}
+
+$payload = json_decode(file_get_contents($payloadpath), true);
+
+if (!is_array($payload)) {
+    fwrite(STDERR, "Payload JSON is invalid\n");
+    exit(2);
+}
+
+$target = $payload['target'] ?? [];
+$moodleroot = rtrim((string)($target['moodleRoot'] ?? ''), DIRECTORY_SEPARATOR);
+
+if ($moodleroot === '') {
+    fwrite(STDERR, "Moodle root missing\n");
+    exit(2);
+}
+
+$config = $moodleroot . DIRECTORY_SEPARATOR . 'config.php';
+
+if (!is_readable($config)) {
+    fwrite(STDERR, "Moodle config.php not readable: {$config}\n");
+    exit(2);
+}
+
+require_once($config);
+
+global $DB, $CFG;
+
+$operation = (string)($payload['operation'] ?? 'verify');
+$allowpartial = !empty($payload['allowPartialSource']);
+$minimumexpected = (int)($payload['minimumExpectedCount'] ?? 0);
+
+$archiveid = (int)($target['archiveId'] ?? 0);
+$courseid = (int)($target['courseId'] ?? 0);
+$cmid = (int)($target['cmId'] ?? 0);
+$contextid = (int)($target['contextId'] ?? 0);
+$servicename = (string)($target['serviceName'] ?? 'mod_uckkarchive_search_mediatheque');
+
+$requiredtables = [
+    'uckkarchive_external_work',
+    'uckkarchive_media',
+    'uckkarchive_media_source',
+    'uckkarchive_media_tag',
+    'uckkarchive_media_collection',
+    'uckkarchive_media_collection_item',
+];
+
+function out_json(array $out, int $code = 0): void {
+    echo json_encode($out, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) . PHP_EOL;
+    exit($code);
+}
+
+function table_exists_uckk(string $table): bool {
+    global $DB;
+    try {
+        $DB->get_columns($table);
+        return true;
+    } catch (Throwable $e) {
+        return false;
+    }
+}
+
+function table_columns_uckk(string $table): array {
+    global $DB;
+    try {
+        return $DB->get_columns($table);
+    } catch (Throwable $e) {
+        return [];
+    }
+}
+
+function has_col_uckk(string $table, string $column): bool {
+    $cols = table_columns_uckk($table);
+    return array_key_exists($column, $cols);
+}
+
+function first_col_uckk(string $table, array $candidates): string {
+    foreach ($candidates as $candidate) {
+        if (has_col_uckk($table, $candidate)) {
+            return $candidate;
+        }
+    }
+    return '';
+}
+
+function count_table_uckk(string $table): int {
+    global $DB;
+    if (!table_exists_uckk($table)) {
+        return 0;
+    }
+    try {
+        return (int)$DB->count_records($table);
+    } catch (Throwable $e) {
+        return 0;
+    }
+}
+
+function normalize_slug_uckk(string $value): string {
+    $value = trim(mb_strtolower($value));
+    $value = preg_replace('/[^a-z0-9]+/i', '-', $value);
+    $value = trim($value, '-');
+    return $value !== '' ? $value : sha1($value);
+}
+
+function field_value_uckk(array $entry, array $keys, string $default = ''): string {
+    foreach ($keys as $key) {
+        if (array_key_exists($key, $entry) && trim((string)$entry[$key]) !== '') {
+            return trim((string)$entry[$key]);
+        }
+    }
+    return $default;
+}
+
+function entry_key_uckk(array $entry): string {
+    $slug = field_value_uckk($entry, ['slug', 'key', 'idnumber', 'id']);
+    if ($slug !== '') {
+        return normalize_slug_uckk($slug);
+    }
+
+    $url = field_value_uckk($entry, ['url', 'source_url', 'external_url', 'href']);
+    if ($url !== '') {
+        return sha1($url);
+    }
+
+    $title = field_value_uckk($entry, ['title', 'name']);
+    return normalize_slug_uckk($title);
+}
+
+function entry_url_uckk(array $entry): string {
+    return field_value_uckk($entry, ['url', 'source_url', 'external_url', 'href']);
+}
+
+function entry_title_uckk(array $entry): string {
+    return field_value_uckk($entry, ['title', 'name'], 'Sans titre');
+}
+
+function entry_summary_uckk(array $entry): string {
+    return field_value_uckk($entry, ['summary', 'description', 'intro'], '');
+}
+
+function entry_type_uckk(array $entry): string {
+    return field_value_uckk($entry, ['type', 'resource_type', 'kind'], 'external_reference');
+}
+
+function set_if_col_uckk(stdClass $record, string $table, string $column, $value): void {
+    if (has_col_uckk($table, $column)) {
+        $record->{$column} = $value;
+    }
+}
+
+function find_record_by_candidates_uckk(string $table, array $candidates): ?stdClass {
+    global $DB;
+
+    foreach ($candidates as $field => $value) {
+        if ($value === '' || !has_col_uckk($table, $field)) {
+            continue;
+        }
+
+        try {
+            $found = $DB->get_record($table, [$field => $value], '*', IGNORE_MULTIPLE);
+            if ($found) {
+                return $found;
+            }
+        } catch (Throwable $e) {
+            continue;
+        }
+    }
+
+    return null;
+}
+
+function upsert_external_work_uckk(array $entry, bool $apply): array {
+    global $DB;
+
+    $table = 'uckkarchive_external_work';
+    $key = entry_key_uckk($entry);
+    $url = entry_url_uckk($entry);
+    $title = entry_title_uckk($entry);
+    $summary = entry_summary_uckk($entry);
+    $type = entry_type_uckk($entry);
+    $now = time();
+
+    $existing = find_record_by_candidates_uckk($table, [
+        'slug' => $key,
+        'sourcekey' => $key,
+        'idnumber' => $key,
+        'url' => $url,
+        'sourceurl' => $url,
+        'externalurl' => $url,
+        'title' => $title,
+        'name' => $title,
+    ]);
+
+    if (!$apply) {
+        return [
+            'id' => $existing ? (int)$existing->id : 0,
+            'change' => $existing ? 'update' : 'create',
+            'key' => $key,
+            'url' => $url,
+            'title' => $title,
+        ];
+    }
+
+    $record = $existing ? clone $existing : new stdClass();
+
+    set_if_col_uckk($record, $table, 'slug', $key);
+    set_if_col_uckk($record, $table, 'sourcekey', $key);
+    set_if_col_uckk($record, $table, 'idnumber', $key);
+    set_if_col_uckk($record, $table, 'title', $title);
+    set_if_col_uckk($record, $table, 'name', $title);
+    set_if_col_uckk($record, $table, 'summary', $summary);
+    set_if_col_uckk($record, $table, 'description', $summary);
+    set_if_col_uckk($record, $table, 'url', $url);
+    set_if_col_uckk($record, $table, 'sourceurl', $url);
+    set_if_col_uckk($record, $table, 'externalurl', $url);
+    set_if_col_uckk($record, $table, 'type', $type);
+    set_if_col_uckk($record, $table, 'sourcetype', $type);
+    set_if_col_uckk($record, $table, 'timemodified', $now);
+
+    if (!$existing) {
+        set_if_col_uckk($record, $table, 'timecreated', $now);
+        $id = (int)$DB->insert_record($table, $record);
+        return ['id' => $id, 'change' => 'create', 'key' => $key, 'url' => $url, 'title' => $title];
+    }
+
+    $record->id = $existing->id;
+    $DB->update_record($table, $record);
+    return ['id' => (int)$existing->id, 'change' => 'update', 'key' => $key, 'url' => $url, 'title' => $title];
+}
+
+function upsert_media_uckk(array $entry, int $externalworkid, bool $apply, int $archiveid, int $courseid, int $cmid, int $contextid): array {
+    global $DB;
+
+    $table = 'uckkarchive_media';
+    $key = entry_key_uckk($entry);
+    $url = entry_url_uckk($entry);
+    $title = entry_title_uckk($entry);
+    $summary = entry_summary_uckk($entry);
+    $type = entry_type_uckk($entry);
+    $now = time();
+
+    $candidates = [
+        'slug' => $key,
+        'sourcekey' => $key,
+        'idnumber' => $key,
+        'url' => $url,
+        'sourceurl' => $url,
+        'externalurl' => $url,
+        'title' => $title,
+        'name' => $title,
+    ];
+
+    if ($externalworkid > 0) {
+        $candidates['externalworkid'] = $externalworkid;
+        $candidates['external_work_id'] = $externalworkid;
+    }
+
+    $existing = find_record_by_candidates_uckk($table, $candidates);
+
+    if (!$apply) {
+        return [
+            'id' => $existing ? (int)$existing->id : 0,
+            'change' => $existing ? 'update' : 'create',
+            'key' => $key,
+            'url' => $url,
+            'title' => $title,
+        ];
+    }
+
+    $record = $existing ? clone $existing : new stdClass();
+
+    set_if_col_uckk($record, $table, 'archiveid', $archiveid);
+    set_if_col_uckk($record, $table, 'courseid', $courseid);
+    set_if_col_uckk($record, $table, 'cmid', $cmid);
+    set_if_col_uckk($record, $table, 'contextid', $contextid);
+    set_if_col_uckk($record, $table, 'externalworkid', $externalworkid);
+    set_if_col_uckk($record, $table, 'external_work_id', $externalworkid);
+    set_if_col_uckk($record, $table, 'slug', $key);
+    set_if_col_uckk($record, $table, 'sourcekey', $key);
+    set_if_col_uckk($record, $table, 'idnumber', $key);
+    set_if_col_uckk($record, $table, 'title', $title);
+    set_if_col_uckk($record, $table, 'name', $title);
+    set_if_col_uckk($record, $table, 'summary', $summary);
+    set_if_col_uckk($record, $table, 'description', $summary);
+    set_if_col_uckk($record, $table, 'url', $url);
+    set_if_col_uckk($record, $table, 'sourceurl', $url);
+    set_if_col_uckk($record, $table, 'externalurl', $url);
+    set_if_col_uckk($record, $table, 'type', $type);
+    set_if_col_uckk($record, $table, 'mediatype', $type);
+    set_if_col_uckk($record, $table, 'timemodified', $now);
+
+    if (!$existing) {
+        set_if_col_uckk($record, $table, 'timecreated', $now);
+        $id = (int)$DB->insert_record($table, $record);
+        return ['id' => $id, 'change' => 'create', 'key' => $key, 'url' => $url, 'title' => $title];
+    }
+
+    $record->id = $existing->id;
+    $DB->update_record($table, $record);
+    return ['id' => (int)$existing->id, 'change' => 'update', 'key' => $key, 'url' => $url, 'title' => $title];
+}
+
+function upsert_media_source_uckk(array $entry, int $mediaid, int $externalworkid, bool $apply): array {
+    global $DB;
+
+    $table = 'uckkarchive_media_source';
+    $url = entry_url_uckk($entry);
+    $title = entry_title_uckk($entry);
+    $type = entry_type_uckk($entry);
+    $now = time();
+
+    $existing = find_record_by_candidates_uckk($table, [
+        'mediaid' => $mediaid,
+        'externalworkid' => $externalworkid,
+        'external_work_id' => $externalworkid,
+        'url' => $url,
+        'sourceurl' => $url,
+        'externalurl' => $url,
+    ]);
+
+    if (!$apply) {
+        return [
+            'id' => $existing ? (int)$existing->id : 0,
+            'change' => $existing ? 'update' : 'create',
+            'url' => $url,
+        ];
+    }
+
+    $record = $existing ? clone $existing : new stdClass();
+
+    set_if_col_uckk($record, $table, 'mediaid', $mediaid);
+    set_if_col_uckk($record, $table, 'externalworkid', $externalworkid);
+    set_if_col_uckk($record, $table, 'external_work_id', $externalworkid);
+    set_if_col_uckk($record, $table, 'title', $title);
+    set_if_col_uckk($record, $table, 'name', $title);
+    set_if_col_uckk($record, $table, 'url', $url);
+    set_if_col_uckk($record, $table, 'sourceurl', $url);
+    set_if_col_uckk($record, $table, 'externalurl', $url);
+    set_if_col_uckk($record, $table, 'type', $type);
+    set_if_col_uckk($record, $table, 'sourcetype', $type);
+set_if_col_uckk($record, $table, 'timemodified', $now);
+
+    if (!$existing) {
+        set_if_col_uckk($record, $table, 'timecreated', $now);
+        $id = (int)$DB->insert_record($table, $record);
+        return ['id' => $id, 'change' => 'create', 'url' => $url];
+    }
+
+    $record->id = $existing->id;
+    $DB->update_record($table, $record);
+    return ['id' => (int)$existing->id, 'change' => 'update', 'url' => $url];
+}
+
+function load_manifest_entries_uckk(array $payload): array {
+    $manifest = $payload['manifest'] ?? [];
+    $entries = $manifest['entries'] ?? [];
+
+    if (is_array($entries) && count($entries) > 0) {
+        return array_values($entries);
+    }
+
+    $manifestpath = (string)($manifest['path'] ?? '');
+
+    if ($manifestpath === '') {
+        return [];
+    }
+
+    if (!is_readable($manifestpath)) {
+        throw new Exception("Manifest not readable: {$manifestpath}");
+    }
+
+    $decoded = json_decode(file_get_contents($manifestpath), true);
+
+    if (!is_array($decoded)) {
+        throw new Exception("Manifest JSON invalid: {$manifestpath}");
+    }
+
+    if (isset($decoded['entries']) && is_array($decoded['entries'])) {
+        return array_values($decoded['entries']);
+    }
+
+    if (isset($decoded['items']) && is_array($decoded['items'])) {
+        return array_values($decoded['items']);
+    }
+
+    if (array_is_list($decoded)) {
+        return array_values($decoded);
+    }
+
+    return [];
+}
+
+$missing = [];
+
+foreach ($requiredtables as $table) {
+    if (!table_exists_uckk($table)) {
+        $missing[] = $table;
+    }
+}
+
+$countsBefore = [];
+
+foreach ($requiredtables as $table) {
+    $countsBefore[$table] = count_table_uckk($table);
+}
+
+$warnings = [];
+$errors = [];
+$changes = [
+    'external_work' => ['create' => 0, 'update' => 0, 'unchanged' => 0],
+    'media' => ['create' => 0, 'update' => 0, 'unchanged' => 0],
+    'media_source' => ['create' => 0, 'update' => 0, 'unchanged' => 0],
+];
+
+if (count($missing) > 0) {
+    out_json([
+        'success' => false,
+        'status' => 'Échoué',
+        'operation' => $operation,
+        'warnings' => $warnings,
+        'errors' => array_map(fn($t) => "Table Moodle manquante : {$t}", $missing),
+        'countsBefore' => $countsBefore,
+        'countsAfter' => $countsBefore,
+    ], 1);
+}
+
+if ($operation === 'verify') {
+    $mediaCount = $countsBefore['uckkarchive_media'] ?? 0;
+    $sourceCount = $countsBefore['uckkarchive_media_source'] ?? 0;
+
+    if ($mediaCount <= 0) {
+        $warnings[] = "Aucune carte Médiathèque trouvée.";
+    }
+
+    if ($sourceCount <= 0) {
+        $warnings[] = "Aucune source Médiathèque trouvée.";
+    }
+
+    out_json([
+        'success' => count($warnings) === 0,
+        'status' => count($warnings) === 0 ? 'Réussi' : 'Réussi avec avertissements',
+        'operation' => $operation,
+        'serviceName' => $servicename,
+        'warnings' => $warnings,
+        'errors' => [],
+        'countsBefore' => $countsBefore,
+        'countsAfter' => $countsBefore,
+    ]);
+}
+
+try {
+    $entries = load_manifest_entries_uckk($payload);
+} catch (Throwable $e) {
+    out_json([
+        'success' => false,
+        'status' => 'Échoué',
+        'operation' => $operation,
+        'warnings' => $warnings,
+        'errors' => ["Manifest error: " . $e->getMessage()],
+        'countsBefore' => $countsBefore,
+        'countsAfter' => $countsBefore,
+    ], 1);
+}
+
+$entrycount = count($entries);
+$currentmedia = $countsBefore['uckkarchive_media'] ?? 0;
+
+if ($minimumexpected > 0 && $entrycount < $minimumexpected && !$allowpartial) {
+    out_json([
+        'success' => false,
+        'status' => 'Échoué',
+        'operation' => $operation,
+        'warnings' => $warnings,
+        'errors' => ["Source partielle refusée : {$entrycount} entrées, minimum attendu {$minimumexpected}."],
+        'countsBefore' => $countsBefore,
+        'countsAfter' => $countsBefore,
+        'entryCount' => $entrycount,
+    ], 1);
+}
+
+if ($currentmedia > 0 && $entrycount > 0 && $entrycount < max(10, floor($currentmedia / 2)) && !$allowpartial) {
+    out_json([
+        'success' => false,
+        'status' => 'Échoué',
+        'operation' => $operation,
+        'warnings' => $warnings,
+        'errors' => ["Source partielle refusée : {$entrycount} entrées source pour {$currentmedia} cartes existantes."],
+        'countsBefore' => $countsBefore,
+        'countsAfter' => $countsBefore,
+        'entryCount' => $entrycount,
+    ], 1);
+}
+
+if ($entrycount === 0) {
+    out_json([
+        'success' => false,
+        'status' => 'Échoué',
+        'operation' => $operation,
+        'warnings' => $warnings,
+        'errors' => ["Aucune entrée Médiathèque fournie."],
+        'countsBefore' => $countsBefore,
+        'countsAfter' => $countsBefore,
+        'entryCount' => 0,
+    ], 1);
+}
+
+$apply = $operation === 'apply';
+
+foreach ($entries as $entry) {
+    if (!is_array($entry)) {
+        $warnings[] = "Entrée ignorée : format invalide.";
+        continue;
+    }
+
+    $url = entry_url_uckk($entry);
+    $title = entry_title_uckk($entry);
+
+    if ($url === '') {
+        $warnings[] = "Entrée ignorée : URL vide pour {$title}.";
+        continue;
+    }
+
+    $external = upsert_external_work_uckk($entry, $apply);
+    $changes['external_work'][$external['change']]++;
+
+    $media = upsert_media_uckk($entry, (int)$external['id'], $apply, $archiveid, $courseid, $cmid, $contextid);
+    $changes['media'][$media['change']]++;
+
+    $source = upsert_media_source_uckk($entry, (int)$media['id'], (int)$external['id'], $apply);
+    $changes['media_source'][$source['change']]++;
+}
+
+$countsAfter = [];
+
+foreach ($requiredtables as $table) {
+    $countsAfter[$table] = count_table_uckk($table);
+}
+
+out_json([
+    'success' => true,
+    'status' => count($warnings) > 0 ? 'Réussi avec avertissements' : 'Réussi',
+    'operation' => $operation,
+    'entryCount' => $entrycount,
+    'applied' => $apply,
+    'serviceName' => $servicename,
+    'warnings' => $warnings,
+    'errors' => [],
+    'changes' => $changes,
+    'countsBefore' => $countsBefore,
+    'countsAfter' => $countsAfter,
+]);
+'@
+}
+
+function Invoke-UckkProcessCapture {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$FilePath,
+
+        [string[]]$Arguments = @(),
+
+        [string]$WorkingDirectory = "",
+
+        [int]$TimeoutSeconds = 120
+    )
+
+    $psi = [System.Diagnostics.ProcessStartInfo]::new()
+    $psi.FileName = $FilePath
+    $psi.UseShellExecute = $false
+    $psi.RedirectStandardOutput = $true
+    $psi.RedirectStandardError = $true
+    $psi.CreateNoWindow = $true
+
+    if (-not [string]::IsNullOrWhiteSpace($WorkingDirectory)) {
+        $psi.WorkingDirectory = $WorkingDirectory
+    }
+
+    foreach ($arg in $Arguments) {
+        [void]$psi.ArgumentList.Add($arg)
+    }
+
+    $process = [System.Diagnostics.Process]::new()
+    $process.StartInfo = $psi
+
+    [void]$process.Start()
+
+    $stdoutTask = $process.StandardOutput.ReadToEndAsync()
+    $stderrTask = $process.StandardError.ReadToEndAsync()
+
+    $finished = $process.WaitForExit($TimeoutSeconds * 1000)
+
+    if (-not $finished) {
+        try {
+            $process.Kill($true)
+        } catch {
+            # Ignore kill failures; the result below still reports timeout.
+        }
+
+        return [pscustomobject]@{
+            exitCode = -1
+            stdout   = ""
+            stderr   = "Timeout after $TimeoutSeconds seconds."
+            timedOut = $true
+        }
+    }
+
+    return [pscustomobject]@{
+        exitCode = $process.ExitCode
+        stdout   = $stdoutTask.Result
+        stderr   = $stderrTask.Result
+        timedOut = $false
+    }
+}
+
+function Invoke-UckkMediathequeMoodleCli {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [ValidateSet("verify", "simulate", "apply")]
+        [string]$Operation,
+
+        [Parameter(Mandatory)]
+        [object]$Config,
+
+        [Parameter(Mandatory)]
+        [ValidateSet("local", "server")]
+        [string]$Target,
+
+        [string]$ManifestPath = "",
+
+        [object[]]$Entries = @(),
+
+        [switch]$AllowPartialSource,
+
+        [int]$MinimumExpectedCount = 0,
+
+        [int]$TimeoutSeconds = 180
+    )
+
+    $settings = Get-UckkMediathequeTargetSettings -Config $Config -Target $Target
+    $settingsCheck = Test-UckkMediathequeTargetSettings -Settings $settings
+
+    if (-not $settingsCheck.success) {
+        return $settingsCheck
+    }
+
+    if ($Operation -ne "verify" -and [string]::IsNullOrWhiteSpace($ManifestPath) -and $Entries.Count -eq 0) {
+        return New-UckkMediathequeMoodleResult `
+            -Success $false `
+            -Status "Échoué" `
+            -Action "Médiathèque Moodle" `
+            -Target $Target `
+            -DangerLevel 1 `
+            -Mode $Operation `
+            -Summary "L’action a échoué." `
+            -Errors @("Aucune source Médiathèque fournie.") `
+            -NextStep "Fournir un manifeste validé ou des entrées validées."
+    }
+
+    $payload = ConvertTo-UckkMediathequeMoodlePayload `
+        -Operation $Operation `
+        -Settings $settings `
+        -ManifestPath $ManifestPath `
+        -Entries $Entries `
+        -AllowPartialSource:$AllowPartialSource `
+        -MinimumExpectedCount $MinimumExpectedCount
+
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "uckk_ops_console"
+    if (-not (Test-Path -LiteralPath $tempRoot)) {
+        [void](New-Item -ItemType Directory -Path $tempRoot -Force)
+    }
+
+    $stamp = Get-Date -Format "yyyyMMdd_HHmmss_fff"
+    $phpPath = Join-Path $tempRoot "uckk_mediatheque_moodle_$stamp.php"
+    $payloadPath = Join-Path $tempRoot "uckk_mediatheque_moodle_$stamp.json"
+
+    try {
+        New-UckkMediathequeMoodlePhpHelper | Set-Content -LiteralPath $phpPath -Encoding UTF8
+        $payload | ConvertTo-Json -Depth 80 | Set-Content -LiteralPath $payloadPath -Encoding UTF8
+
+        $result = Invoke-UckkProcessCapture `
+            -FilePath $settings.phpPath `
+            -Arguments @($phpPath, $payloadPath) `
+            -WorkingDirectory $settings.moodleRoot `
+            -TimeoutSeconds $TimeoutSeconds
+
+        $raw = [string]$result.stdout
+        $stderr = [string]$result.stderr
+if ($result.exitCode -ne 0) {
+            return New-UckkMediathequeMoodleResult `
+                -Success $false `
+                -Status "Échoué" `
+                -Action (Get-UckkMediathequeActionName -Operation $Operation -Target $Target) `
+                -Target (Get-UckkMediathequeTargetName -Target $Target) `
+                -DangerLevel (Get-UckkMediathequeDangerLevel -Operation $Operation -Target $Target) `
+                -Mode (Get-UckkMediathequeMode -Operation $Operation) `
+                -Summary "L’action a échoué." `
+                -Errors @("Le helper Moodle a échoué.", $stderr) `
+                -NextStep "Lire le log technique, vérifier la configuration Moodle et relancer après correction." `
+                -Data ([pscustomobject]@{
+                    exitCode = $result.exitCode
+                    stdout   = $raw
+                    stderr   = $stderr
+                    timedOut = $result.timedOut
+                })
+        }
+
+        $decoded = $null
+
+        try {
+            $decoded = $raw | ConvertFrom-Json -Depth 80
+        } catch {
+            return New-UckkMediathequeMoodleResult `
+                -Success $false `
+                -Status "Échoué" `
+                -Action (Get-UckkMediathequeActionName -Operation $Operation -Target $Target) `
+                -Target (Get-UckkMediathequeTargetName -Target $Target) `
+                -DangerLevel (Get-UckkMediathequeDangerLevel -Operation $Operation -Target $Target) `
+                -Mode (Get-UckkMediathequeMode -Operation $Operation) `
+                -Summary "L’action a échoué." `
+                -Errors @("La réponse du helper Moodle n’est pas un JSON valide.") `
+                -NextStep "Lire le log technique et vérifier le helper Moodle." `
+                -Data ([pscustomobject]@{
+                    raw    = $raw
+                    stderr = $stderr
+                })
+        }
+
+        return ConvertTo-UckkMediathequeMoodleResult `
+            -Decoded $decoded `
+            -Operation $Operation `
+            -Target $Target `
+            -ManifestPath $ManifestPath `
+            -Settings $settings
+    }
+    finally {
+        foreach ($file in @($phpPath, $payloadPath)) {
+            if (Test-Path -LiteralPath $file) {
+                Remove-Item -LiteralPath $file -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
+}
+
+function Get-UckkMediathequeActionName {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [ValidateSet("verify", "simulate", "apply")]
+        [string]$Operation,
+
+        [Parameter(Mandatory)]
+        [ValidateSet("local", "server")]
+        [string]$Target
+    )
+
+    if ($Operation -eq "verify") {
+        return if ($Target -eq "server") { "Vérifier Médiathèque serveur" } else { "Vérifier Médiathèque locale" }
+    }
+
+    if ($Operation -eq "simulate") {
+        return if ($Target -eq "server") { "Simulation Médiathèque serveur" } else { "Simulation Médiathèque locale" }
+    }
+
+    return if ($Target -eq "server") { "Appliquer Médiathèque serveur" } else { "Appliquer Médiathèque localement" }
+}
+
+function Get-UckkMediathequeTargetName {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [ValidateSet("local", "server")]
+        [string]$Target
+    )
+
+    return if ($Target -eq "server") { "base Moodle serveur" } else { "base Moodle locale" }
+}
+
+function Get-UckkMediathequeMode {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [ValidateSet("verify", "simulate", "apply")]
+        [string]$Operation
+    )
+
+    switch ($Operation) {
+        "verify" { return "vérification" }
+        "simulate" { return "simulation" }
+        "apply" { return "application" }
+    }
+}
+
+function Get-UckkMediathequeDangerLevel {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [ValidateSet("verify", "simulate", "apply")]
+        [string]$Operation,
+
+        [Parameter(Mandatory)]
+        [ValidateSet("local", "server")]
+        [string]$Target
+    )
+
+    if ($Operation -ne "apply") {
+        return 1
+    }
+
+    if ($Target -eq "server") {
+        return 6
+    }
+
+    return 4
+}
+
+function ConvertTo-UckkMediathequeMoodleResult {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [object]$Decoded,
+
+        [Parameter(Mandatory)]
+        [ValidateSet("verify", "simulate", "apply")]
+        [string]$Operation,
+
+        [Parameter(Mandatory)]
+        [ValidateSet("local", "server")]
+        [string]$Target,
+
+        [string]$ManifestPath = "",
+
+        [object]$Settings = $null
+    )
+
+    $success = [bool]$Decoded.success
+    $status = [string]$Decoded.status
+    $warnings = @()
+    $errors = @()
+
+    if ($Decoded.PSObject.Properties.Name -contains "warnings" -and $null -ne $Decoded.warnings) {
+        $warnings = @($Decoded.warnings | ForEach-Object { [string]$_ })
+    }
+
+    if ($Decoded.PSObject.Properties.Name -contains "errors" -and $null -ne $Decoded.errors) {
+        $errors = @($Decoded.errors | ForEach-Object { [string]$_ })
+    }
+
+    $action = Get-UckkMediathequeActionName -Operation $Operation -Target $Target
+    $targetName = Get-UckkMediathequeTargetName -Target $Target
+    $mode = Get-UckkMediathequeMode -Operation $Operation
+    $danger = Get-UckkMediathequeDangerLevel -Operation $Operation -Target $Target
+
+    $summary = switch ($Operation) {
+        "verify" {
+            if ($success) {
+                "Réussi — la Médiathèque $Target a été vérifiée."
+            } else {
+                "L’action a échoué."
+            }
+        }
+        "simulate" {
+            if ($success) {
+                "Réussi — simulation terminée. Aucune donnée Moodle n’a été modifiée."
+            } else {
+                "L’action a échoué."
+            }
+        }
+        "apply" {
+            if ($success) {
+                "Réussi — Médiathèque $Target appliquée. Des données Moodle ont été modifiées."
+            } else {
+                "L’action a échoué."
+            }
+        }
+    }
+
+    $nextStep = switch ($Operation) {
+        "verify" {
+            if ($Target -eq "server") {
+                "Ouvrir la Médiathèque serveur dans le navigateur si la page dépend de JavaScript ou AJAX."
+            } else {
+                "Ouvrir la Médiathèque locale dans le navigateur si la page dépend de JavaScript ou AJAX."
+            }
+        }
+        "simulate" {
+            "Lire le rapport de simulation. Appliquer seulement si les changements sont corrects."
+        }
+        "apply" {
+            if ($Target -eq "server") {
+                "Vérifier la Médiathèque serveur dans le navigateur."
+            } else {
+                "Vérifier la Médiathèque locale dans le navigateur."
+            }
+        }
+    }
+
+    if (-not $success -and $errors.Count -eq 0) {
+        $errors = @("Erreur Médiathèque Moodle non détaillée.")
+    }
+
+    return New-UckkMediathequeMoodleResult `
+        -Success $success `
+        -Status $status `
+        -Action $action `
+        -Target $targetName `
+        -DangerLevel $danger `
+        -Mode $mode `
+        -Summary $summary `
+        -Warnings $warnings `
+        -Errors $errors `
+        -NextStep $nextStep `
+        -Data ([pscustomobject]@{
+            operation    = $Operation
+            target       = $Target
+            manifestPath = $ManifestPath
+            settings     = $Settings
+            result       = $Decoded
+        })
+}
+
+function Invoke-UckkMediathequeMoodleVerify {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [object]$Config,
+
+        [Parameter(Mandatory)]
+        [ValidateSet("local", "server")]
+        [string]$Target,
+
+        [int]$TimeoutSeconds = 120
+    )
+
+    return Invoke-UckkMediathequeMoodleCli `
+        -Operation "verify" `
+        -Config $Config `
+        -Target $Target `
+        -TimeoutSeconds $TimeoutSeconds
+}
+
+function Invoke-UckkMediathequeMoodleSimulation {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [object]$Config,
+
+        [Parameter(Mandatory)]
+        [ValidateSet("local", "server")]
+        [string]$Target,
+
+        [string]$ManifestPath = "",
+
+        [object[]]$Entries = @(),
+
+        [int]$MinimumExpectedCount = 0,
+
+        [int]$TimeoutSeconds = 180
+    )
+
+    return Invoke-UckkMediathequeMoodleCli `
+        -Operation "simulate" `
+        -Config $Config `
+        -Target $Target `
+        -ManifestPath $ManifestPath `
+        -Entries $Entries `
+        -MinimumExpectedCount $MinimumExpectedCount `
+        -TimeoutSeconds $TimeoutSeconds
+}
+
+function Invoke-UckkMediathequeMoodleApply {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [object]$Config,
+
+        [Parameter(Mandatory)]
+        [ValidateSet("local", "server")]
+        [string]$Target,
+
+        [string]$ManifestPath = "",
+
+        [object[]]$Entries = @(),
+
+        [switch]$AllowPartialSource,
+
+        [int]$MinimumExpectedCount = 0,
+
+        [int]$TimeoutSeconds = 300
+    )
+
+    return Invoke-UckkMediathequeMoodleCli `
+        -Operation "apply" `
+        -Config $Config `
+        -Target $Target `
+        -ManifestPath $ManifestPath `
+        -Entries $Entries `
+        -AllowPartialSource:$AllowPartialSource `
+        -MinimumExpectedCount $MinimumExpectedCount `
+        -TimeoutSeconds $TimeoutSeconds
+}
+
+Export-ModuleMember `
+    -Function New-UckkMediathequeMoodleResult, `
+              Get-UckkObjectValue, `
+              Get-UckkMediathequeMoodleTableNames, `
+              Get-UckkMediathequeTargetSettings, `
+              Test-UckkMediathequeTargetSettings, `
+              ConvertTo-UckkMediathequeMoodlePayload, `
+              New-UckkMediathequeMoodlePhpHelper, `
+              Invoke-UckkProcessCapture, `
+              Invoke-UckkMediathequeMoodleCli, `
+              Get-UckkMediathequeActionName, `
+              Get-UckkMediathequeTargetName, `
+              Get-UckkMediathequeMode, `
+              Get-UckkMediathequeDangerLevel, `
+              ConvertTo-UckkMediathequeMoodleResult, `
+              Invoke-UckkMediathequeMoodleVerify, `
+              Invoke-UckkMediathequeMoodleSimulation, `
+              Invoke-UckkMediathequeMoodleApply
+

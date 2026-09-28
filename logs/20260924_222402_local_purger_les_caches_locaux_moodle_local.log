@@ -1,0 +1,89 @@
+UCKK Ops Console — log technique
+
+Début : 2026-09-24 22:24:02
+Action : Purger les caches locaux
+Domaine : local
+Cible : Moodle local
+
+Entrées
+-------
+[2026-09-24 22:24:02] [INFO] Réussi — les caches Moodle locaux ont été purgés.
+Données :
+{
+  "success": true,
+  "status": "Réussi",
+  "action": "Purger les caches locaux",
+  "domain": "local",
+  "target": "Moodle local",
+  "dangerLevel": 2,
+  "mode": "application",
+  "summary": "Réussi — les caches Moodle locaux ont été purgés.",
+  "warnings": [],
+  "errors": [],
+  "nextStep": "Ouvrir Moodle local et vérifier les pages concernées.",
+  "reportPath": "",
+  "logPath": "",
+  "data": {
+    "phpBinary": "php",
+    "purgeRoot": "C:\\mycode\\UCKK\\moodle\\moodle",
+    "purgeScript": "C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\purge_caches.php",
+    "candidateRoots": [
+      "C:\\mycode\\UCKK\\moodle\\moodle\\public",
+      "C:\\mycode\\UCKK\\moodle\\moodle"
+    ],
+    "process": {
+      "success": true,
+      "timedOut": false,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "filePath": "php",
+      "arguments": [
+        "C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\purge_caches.php"
+      ],
+      "workingDir": "C:\\mycode\\UCKK\\moodle\\moodle",
+      "timeoutSecond": 180
+    }
+  },
+  "steps": [
+    {
+      "name": "Vérifier script purge caches",
+      "status": "Réussi",
+      "summary": "Script Moodle trouvé.",
+      "detail": "C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\purge_caches.php",
+      "data": null,
+      "timestamp": "2026-09-24 22:23:59"
+    },
+    {
+      "name": "Exécuter purge caches",
+      "status": "Réussi",
+      "summary": "Caches Moodle locaux purgés.",
+      "detail": "",
+      "data": {
+        "success": true,
+        "timedOut": false,
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "",
+        "filePath": "php",
+        "arguments": [
+          "C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\purge_caches.php"
+        ],
+        "workingDir": "C:\\mycode\\UCKK\\moodle\\moodle",
+        "timeoutSecond": 180
+      },
+      "timestamp": "2026-09-24 22:24:02"
+    }
+  ],
+  "startedAt": "2026-09-24 22:23:59",
+  "finishedAt": "2026-09-24 22:24:02",
+  "durationSeconds": 3.0
+}
+
+
+Fin
+---
+Fin : 2026-09-24 22:24:02
+Statut : Terminé
+Résumé : Réussi — les caches Moodle locaux ont été purgés.
+

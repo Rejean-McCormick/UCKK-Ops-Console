@@ -1,0 +1,267 @@
+UCKK Ops Console — log technique
+
+Début : 2026-09-24 19:10:39
+Action : Préparer local et ouvrir Moodle
+Domaine : local
+Cible : Moodle local + base locale
+
+Entrées
+-------
+[2026-09-24 19:10:39] [ERROR] Arrêt à l'étape 3/8 : local.moodle_diagnostic — Échoué. L'étape a échoué pendant son exécution.
+Données :
+{
+  "success": false,
+  "status": "Échoué",
+  "action": "Préparer local et ouvrir Moodle",
+  "domain": "local",
+  "target": "Moodle local + base locale",
+  "dangerLevel": 3,
+  "mode": "application",
+  "summary": "Arrêt à l'étape 3/8 : local.moodle_diagnostic — Échoué. L'étape a échoué pendant son exécution.",
+  "warnings": null,
+  "errors": [
+    "Impossible de valider l’argument sur le paramètre « Status ». L’argument «Avertissement» n’appartient pas à l’ensemble «Non lancée;En cours;Réussi;Réussi avec avertissements;Échoué;Ignoré;Annulé» spécifié par l’attribut ValidateSet. Fournissez un argument qui se trouve dans le jeu, puis réessayez la commande.",
+    "Arrêt à l'étape 3/8 : local.moodle_diagnostic — Échoué. L'étape a échoué pendant son exécution."
+  ],
+  "nextStep": "Corriger l'étape échouée puis relancer le bouton depuis Accueil.",
+  "reportPath": "",
+  "logPath": "",
+  "data": {
+    "failedStep": "local.moodle_diagnostic",
+    "totalSteps": 8,
+    "completed": [
+      {
+        "id": "configuration.verify",
+        "label": "Verifier la configuration",
+        "status": "Reussi",
+        "summary": "Configuration valide.",
+        "result": {
+          "success": true,
+          "status": "Reussi",
+          "action": "Verifier la configuration",
+          "domain": "configuration",
+          "target": "configuration",
+          "dangerLevel": 1,
+          "mode": "verification",
+          "summary": "Configuration valide.",
+          "warnings": [],
+          "errors": [],
+          "nextStep": "Aucune action requise.",
+          "reportPath": "",
+          "logPath": "",
+          "data": {
+            "configPath": "C:\\mycode\\UCKK\\UCKK_ops_console\\config\\uckk-ops-console.config.json",
+            "validation": {
+              "success": true,
+              "status": "Reussi",
+              "issues": [],
+              "errors": [],
+              "warnings": []
+            }
+          }
+        }
+      },
+      {
+        "id": "local.verify.paths",
+        "label": "Vérifier les chemins locaux",
+        "status": "Réussi",
+        "summary": "Réussi — les chemins locaux obligatoires sont présents.",
+        "result": {
+          "success": true,
+          "status": "Réussi",
+          "action": "Vérifier les chemins locaux",
+          "domain": "local",
+          "target": "local",
+          "dangerLevel": 1,
+          "mode": "vérification",
+          "summary": "Réussi — les chemins locaux obligatoires sont présents.",
+          "warnings": [],
+          "errors": [],
+          "nextStep": "Synchroniser source vers Moodle local si nécessaire.",
+          "reportPath": "",
+          "logPath": "",
+          "data": {
+            "checks": [
+              {
+                "label": "Racine de l application",
+                "key": "app.root",
+                "path": "C:\\mycode\\UCKK\\UCKK_ops_console",
+                "exists": true,
+                "status": "Réussi",
+                "detail": "Chemin trouvé."
+              },
+              {
+                "label": "Source Git locale",
+                "key": "paths.uckkMoodleSource",
+                "path": "C:\\mycode\\UCKK\\uckk-moodle",
+                "exists": true,
+                "status": "Réussi",
+                "detail": "Chemin trouvé."
+              },
+              {
+                "label": "Moodle local",
+                "key": "paths.localMoodleRoot",
+                "path": "C:\\mycode\\UCKK\\moodle\\moodle",
+                "exists": true,
+                "status": "Réussi",
+                "detail": "Chemin trouvé."
+              },
+              {
+                "label": "Dossier exécuté par Moodle local",
+                "key": "paths.localMoodleRuntime",
+                "path": "C:\\mycode\\UCKK\\moodle\\moodle\\public",
+                "exists": true,
+                "status": "Réussi",
+                "detail": "Chemin trouvé."
+              },
+              {
+                "label": "Dossier des rapports",
+                "key": "reports.dir",
+                "path": "C:\\mycode\\UCKK\\UCKK_ops_console\\reports",
+                "exists": true,
+                "status": "Réussi",
+                "detail": "Chemin trouvé."
+              },
+              {
+                "label": "Dossier des logs",
+                "key": "logs.dir",
+                "path": "C:\\mycode\\UCKK\\UCKK_ops_console\\logs",
+                "exists": true,
+                "status": "Réussi",
+                "detail": "Chemin trouvé."
+              },
+              {
+                "label": "URL locale",
+                "key": "urls.localBase",
+                "path": "http://127.0.0.1:8000",
+                "exists": true,
+                "status": "Réussi",
+                "detail": "URL configurée."
+              }
+            ]
+          },
+          "steps": [
+            {
+              "name": "Racine de l application",
+              "status": "Réussi",
+              "summary": "Chemin trouvé.",
+              "detail": "C:\\mycode\\UCKK\\UCKK_ops_console",
+              "data": null,
+              "timestamp": "2026-09-24 19:10:39"
+            },
+            {
+              "name": "Source Git locale",
+              "status": "Réussi",
+              "summary": "Chemin trouvé.",
+              "detail": "C:\\mycode\\UCKK\\uckk-moodle",
+              "data": null,
+              "timestamp": "2026-09-24 19:10:39"
+            },
+            {
+              "name": "Moodle local",
+              "status": "Réussi",
+              "summary": "Chemin trouvé.",
+              "detail": "C:\\mycode\\UCKK\\moodle\\moodle",
+              "data": null,
+              "timestamp": "2026-09-24 19:10:39"
+            },
+            {
+              "name": "Dossier exécuté par Moodle local",
+              "status": "Réussi",
+              "summary": "Chemin trouvé.",
+              "detail": "C:\\mycode\\UCKK\\moodle\\moodle\\public",
+              "data": null,
+              "timestamp": "2026-09-24 19:10:39"
+            },
+            {
+              "name": "Dossier des rapports",
+              "status": "Réussi",
+              "summary": "Chemin trouvé.",
+              "detail": "C:\\mycode\\UCKK\\UCKK_ops_console\\reports",
+              "data": null,
+              "timestamp": "2026-09-24 19:10:39"
+            },
+            {
+              "name": "Dossier des logs",
+              "status": "Réussi",
+              "summary": "Chemin trouvé.",
+              "detail": "C:\\mycode\\UCKK\\UCKK_ops_console\\logs",
+              "data": null,
+              "timestamp": "2026-09-24 19:10:39"
+            },
+            {
+              "name": "URL locale",
+              "status": "Réussi",
+              "summary": "URL configurée.",
+              "detail": "http://127.0.0.1:8000",
+              "data": null,
+              "timestamp": "2026-09-24 19:10:39"
+            }
+          ],
+          "startedAt": "2026-09-24 19:10:39",
+          "finishedAt": "2026-09-24 19:10:39",
+          "durationSeconds": 0.0
+        }
+      },
+      {
+        "id": "local.moodle_diagnostic",
+        "label": "Diagnostiquer Moodle local",
+        "status": "Échoué",
+        "summary": "L'étape a échoué pendant son exécution.",
+        "result": {
+          "success": false,
+          "status": "Échoué",
+          "action": "Diagnostiquer Moodle local",
+          "domain": "local",
+          "target": "Moodle local",
+          "dangerLevel": 1,
+          "mode": "vérification",
+          "summary": "L'étape a échoué pendant son exécution.",
+          "warnings": null,
+          "errors": "Impossible de valider l’argument sur le paramètre « Status ». L’argument «Avertissement» n’appartient pas à l’ensemble «Non lancée;En cours;Réussi;Réussi avec avertissements;Échoué;Ignoré;Annulé» spécifié par l’attribut ValidateSet. Fournissez un argument qui se trouve dans le jeu, puis réessayez la commande.",
+          "nextStep": "Corriger le handler 'Test-UckkLocalMoodleCli'.",
+          "reportPath": "",
+          "logPath": "",
+          "data": null,
+          "steps": null,
+          "startedAt": "2026-09-24 19:10:39",
+          "finishedAt": "",
+          "durationSeconds": null
+        }
+      }
+    ],
+    "failedStepIndex": 3,
+    "failedResult": {
+      "success": false,
+      "status": "Échoué",
+      "action": "Diagnostiquer Moodle local",
+      "domain": "local",
+      "target": "Moodle local",
+      "dangerLevel": 1,
+      "mode": "vérification",
+      "summary": "L'étape a échoué pendant son exécution.",
+      "warnings": null,
+      "errors": "Impossible de valider l’argument sur le paramètre « Status ». L’argument «Avertissement» n’appartient pas à l’ensemble «Non lancée;En cours;Réussi;Réussi avec avertissements;Échoué;Ignoré;Annulé» spécifié par l’attribut ValidateSet. Fournissez un argument qui se trouve dans le jeu, puis réessayez la commande.",
+      "nextStep": "Corriger le handler 'Test-UckkLocalMoodleCli'.",
+      "reportPath": "",
+      "logPath": "",
+      "data": null,
+      "steps": null,
+      "startedAt": "2026-09-24 19:10:39",
+      "finishedAt": "",
+      "durationSeconds": null
+    }
+  },
+  "steps": null,
+  "startedAt": "2026-09-24 19:10:39",
+  "finishedAt": "",
+  "durationSeconds": null
+}
+
+
+Fin
+---
+Fin : 2026-09-24 19:10:39
+Statut : Terminé
+Résumé : Arrêt à l'étape 3/8 : local.moodle_diagnostic — Échoué. L'étape a échoué pendant son exécution.
+

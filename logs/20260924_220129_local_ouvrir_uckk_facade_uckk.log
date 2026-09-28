@@ -1,0 +1,70 @@
+UCKK Ops Console — log technique
+
+Début : 2026-09-24 22:01:29
+Action : Ouvrir UCKK
+Domaine : local
+Cible : façade UCKK
+
+Entrées
+-------
+[2026-09-24 22:01:29] [INFO] Réussi — Moodle local répond et a été ouvert : http://127.0.0.1:8000/?theme=uckk
+Données :
+{
+  "success": true,
+  "status": "À vérifier dans le navigateur",
+  "action": "Ouvrir UCKK",
+  "domain": "local",
+  "target": "façade locale uckk",
+  "dangerLevel": 0,
+  "mode": "navigation",
+  "summary": "Réussi — Moodle local répond et a été ouvert : http://127.0.0.1:8000/?theme=uckk",
+  "warnings": [],
+  "errors": [],
+  "nextStep": "Vérifier la façade UCKK dans le navigateur.",
+  "reportPath": "",
+  "logPath": "",
+  "data": {
+    "baseUrl": "http://127.0.0.1:8000",
+    "url": "http://127.0.0.1:8000/?theme=uckk",
+    "baseCheck": {
+      "success": true,
+      "url": "http://127.0.0.1:8000",
+      "statusCode": 200,
+      "detail": "OK"
+    }
+  },
+  "steps": [
+    {
+      "name": "Vérifier Moodle local",
+      "status": "Réussi",
+      "summary": "Moodle local répond déjà.",
+      "detail": "http://127.0.0.1:8000",
+      "data": {
+        "success": true,
+        "url": "http://127.0.0.1:8000",
+        "statusCode": 200,
+        "detail": "OK"
+      },
+      "timestamp": "2026-09-24 22:01:29"
+    },
+    {
+      "name": "Ouvrir navigateur",
+      "status": "Réussi",
+      "summary": "Navigateur ouvert.",
+      "detail": "http://127.0.0.1:8000/?theme=uckk",
+      "data": null,
+      "timestamp": "2026-09-24 22:01:29"
+    }
+  ],
+  "startedAt": "2026-09-24 22:01:29",
+  "finishedAt": "2026-09-24 22:01:29",
+  "durationSeconds": 0.0
+}
+
+
+Fin
+---
+Fin : 2026-09-24 22:01:29
+Statut : Terminé
+Résumé : Réussi — Moodle local répond et a été ouvert : http://127.0.0.1:8000/?theme=uckk
+

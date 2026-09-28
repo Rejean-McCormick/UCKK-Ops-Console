@@ -1,0 +1,37 @@
+UCKK Ops Console — log technique
+
+Début : 2026-09-24 22:36:34
+Action : Diagnostiquer Moodle local
+Domaine : local
+Cible : Moodle local
+
+Entrées
+-------
+[2026-09-24 22:36:34] [INFO] Action déclarée, mais le handler n est pas encore codé : Test-UckkLocalMoodleCli
+Données :
+{
+  "success": false,
+  "status": "Prêt",
+  "action": "Diagnostiquer Moodle local",
+  "domain": "local",
+  "target": "Moodle local",
+  "dangerLevel": 1,
+  "mode": "vérification",
+  "summary": "Action déclarée, mais le handler n est pas encore codé : Test-UckkLocalMoodleCli",
+  "warnings": [
+    "Handler introuvable : Test-UckkLocalMoodleCli"
+  ],
+  "errors": [],
+  "nextStep": "Coder le handler dans le module correspondant.",
+  "reportPath": "",
+  "logPath": "",
+  "data": {}
+}
+
+
+Fin
+---
+Fin : 2026-09-24 22:36:34
+Statut : Terminé
+Résumé : Action déclarée, mais le handler n est pas encore codé : Test-UckkLocalMoodleCli
+

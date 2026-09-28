@@ -1,0 +1,975 @@
+#Requires -Version 7.0
+Set-StrictMode -Off
+<#
+.SYNOPSIS
+  Read-only tests for the UCKK Ops Console.
+
+.DESCRIPTION
+  This module runs safe checks for local pages, server pages,
+  Médiathèque pages, and configured URLs.
+
+  Contract:
+    - A test reads or verifies.
+    - A test must not modify files, Git, server state, or Moodle data.
+    - A test must return an ActionResult-compatible object.
+    - HTTP 200 is useful, but it is not always enough for AJAX pages.
+#>
+
+function Get-UckkTestConfigValue {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $false)]
+        [object] $Config,
+
+        [Parameter(Mandatory = $true)]
+        [string[]] $Path,
+
+        [Parameter(Mandatory = $false)]
+        [AllowNull()]
+        [object] $Default = $null
+    )
+
+    if ($null -eq $Config) {
+        return $Default
+    }
+
+    $current = $Config
+
+    foreach ($part in $Path) {
+        if ($null -eq $current) {
+            return $Default
+        }
+
+        if ($current -is [hashtable]) {
+            if (-not $current.ContainsKey($part)) {
+                return $Default
+            }
+
+            $current = $current[$part]
+            continue
+        }
+
+        if ($current.PSObject.Properties.Name -notcontains $part) {
+            return $Default
+        }
+
+        $current = $current.$part
+    }
+
+    if ($null -eq $current) {
+        return $Default
+    }
+
+    return $current
+}
+
+function New-UckkTestActionResult {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [bool] $Success,
+
+        [Parameter(Mandatory = $true)]
+        [string] $Status,
+
+        [Parameter(Mandatory = $true)]
+        [string] $Action,
+
+        [Parameter(Mandatory = $false)]
+        [string] $Target = 'aucune cible modifiée',
+
+        [Parameter(Mandatory = $false)]
+        [int] $DangerLevel = 1,
+
+        [Parameter(Mandatory = $false)]
+        [string] $Mode = 'test',
+
+        [Parameter(Mandatory = $false)]
+        [string] $Summary = '',
+
+        [Parameter(Mandatory = $false)]
+        [string[]] $Warnings = @(),
+
+        [Parameter(Mandatory = $false)]
+        [string[]] $Errors = @(),
+
+        [Parameter(Mandatory = $false)]
+        [string] $NextStep = 'Aucune action requise.',
+
+        [Parameter(Mandatory = $false)]
+        [string] $ReportPath = '',
+
+        [Parameter(Mandatory = $false)]
+        [string] $LogPath = '',
+
+        [Parameter(Mandatory = $false)]
+        [AllowNull()]
+        [object] $Data = $null
+    )
+
+    return [pscustomobject]@{
+        success     = $Success
+        status      = $Status
+        action      = $Action
+        domain      = 'tests'
+        target      = $Target
+        dangerLevel = $DangerLevel
+        mode        = $Mode
+        summary     = $Summary
+        warnings    = @($Warnings)
+        errors      = @($Errors)
+        nextStep    = $NextStep
+        reportPath  = $ReportPath
+        logPath     = $LogPath
+        data        = $Data
+    }
+}
+
+function Join-UckkUrl {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $BaseUrl,
+
+        [Parameter(Mandatory = $false)]
+        [string] $Path = ''
+    )
+
+    if ([string]::IsNullOrWhiteSpace($BaseUrl)) {
+        return ''
+    }
+
+    if ([string]::IsNullOrWhiteSpace($Path)) {
+        return $BaseUrl.TrimEnd('/')
+    }
+
+    if ($Path -match '^https?://') {
+        return $Path
+    }
+
+    return ($BaseUrl.TrimEnd('/') + '/' + $Path.TrimStart('/'))
+}
+
+function Test-UckkUrlFormat {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $Url
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Url)) {
+        return $false
+    }
+
+    try {
+        $uri = [System.Uri]::new($Url)
+        return ($uri.Scheme -in @('http', 'https') -and -not [string]::IsNullOrWhiteSpace($uri.Host))
+    } catch {
+        return $false
+    }
+}
+
+function Get-UckkConfiguredTestUrls {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $false)]
+        [object] $Config,
+
+        [Parameter(Mandatory = $false)]
+        [ValidateSet('local', 'server', 'all')]
+        [string] $Target = 'all'
+    )
+
+    $localBase = [string](Get-UckkTestConfigValue -Config $Config -Path @('urls', 'localBase') -Default 'http://localhost:8000')
+    $serverBase = [string](Get-UckkTestConfigValue -Config $Config -Path @('urls', 'serverBase') -Default 'https://uckk.org')
+
+    $localMediatheque = [string](Get-UckkTestConfigValue -Config $Config -Path @('urls', 'localMediatheque') -Default (Join-UckkUrl -BaseUrl $localBase -Path '/local/uckk/mediatheque.php'))
+    $serverMediatheque = [string](Get-UckkTestConfigValue -Config $Config -Path @('urls', 'serverMediatheque') -Default (Join-UckkUrl -BaseUrl $serverBase -Path '/local/uckk/mediatheque.php'))
+
+    $localCourseIndex = [string](Get-UckkTestConfigValue -Config $Config -Path @('urls', 'localCourseIndex') -Default (Join-UckkUrl -BaseUrl $localBase -Path '/course/index.php'))
+    $serverCourseIndex = [string](Get-UckkTestConfigValue -Config $Config -Path @('urls', 'serverCourseIndex') -Default (Join-UckkUrl -BaseUrl $serverBase -Path '/course/index.php'))
+
+    $items = @()
+
+    if ($Target -in @('local', 'all')) {
+        $items += [pscustomobject]@{
+            name                  = 'Moodle local'
+            target                = 'local'
+            url                   = $localBase
+            requiresBrowserReview = $false
+        }
+
+        $items += [pscustomobject]@{
+            name                  = 'Index des cours local'
+            target                = 'local'
+            url                   = $localCourseIndex
+            requiresBrowserReview = $true
+        }
+
+        $items += [pscustomobject]@{
+            name                  = 'Médiathèque locale'
+            target                = 'local'
+            url                   = $localMediatheque
+            requiresBrowserReview = $true
+        }
+    }
+
+    if ($Target -in @('server', 'all')) {
+        $items += [pscustomobject]@{
+            name                  = 'uckk.org'
+            target                = 'serveur'
+            url                   = $serverBase
+            requiresBrowserReview = $false
+        }
+
+        $items += [pscustomobject]@{
+            name                  = 'Index des cours serveur'
+            target                = 'serveur'
+            url                   = $serverCourseIndex
+            requiresBrowserReview = $true
+        }
+
+        $items += [pscustomobject]@{
+            name                  = 'Médiathèque serveur'
+            target                = 'serveur'
+            url                   = $serverMediatheque
+            requiresBrowserReview = $true
+        }
+    }
+
+    return @($items)
+}
+
+function Invoke-UckkHttpReadOnlyCheck {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $Url,
+
+        [Parameter(Mandatory = $false)]
+        [int] $TimeoutSeconds = 20
+    )
+
+    if (-not (Test-UckkUrlFormat -Url $Url)) {
+        return [pscustomobject]@{
+            success       = $false
+            statusCode    = $null
+            url           = $Url
+            elapsedMs     = 0
+            contentLength = 0
+            title         = ''
+            error         = 'URL invalide ou vide.'
+        }
+    }
+
+    $started = Get-Date
+
+    try {
+        $response = Invoke-WebRequest `
+            -Uri $Url `
+            -Method Get `
+            -TimeoutSec $TimeoutSeconds `
+            -MaximumRedirection 5 `
+            -UseBasicParsing `
+            -ErrorAction Stop
+
+        $elapsed = [int]((Get-Date) - $started).TotalMilliseconds
+        $content = [string]$response.Content
+        $title = ''
+
+        if ($content -match '<title[^>]*>(.*?)</title>') {
+            $title = ($Matches[1] -replace '\s+', ' ').Trim()
+        }
+
+        return [pscustomobject]@{
+            success       = ($response.StatusCode -ge 200 -and $response.StatusCode -lt 400)
+            statusCode    = [int]$response.StatusCode
+            url           = $Url
+            elapsedMs     = $elapsed
+            contentLength = $content.Length
+            title         = $title
+            error         = ''
+        }
+    } catch {
+        $elapsed = [int]((Get-Date) - $started).TotalMilliseconds
+
+        $statusCode = $null
+        if ($_.Exception.Response -and $_.Exception.Response.StatusCode) {
+            try {
+                $statusCode = [int]$_.Exception.Response.StatusCode
+            } catch {
+                $statusCode = $null
+            }
+        }
+
+        return [pscustomobject]@{
+            success       = $false
+            statusCode    = $statusCode
+            url           = $Url
+            elapsedMs     = $elapsed
+            contentLength = 0
+            title         = ''
+            error         = $_.Exception.Message
+        }
+    }
+}
+
+function Test-UckkConfiguredUrl {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $Name,
+
+        [Parameter(Mandatory = $true)]
+        [string] $Url,
+
+        [Parameter(Mandatory = $false)]
+        [string] $Target = 'aucune cible modifiée',
+
+        [Parameter(Mandatory = $false)]
+        [bool] $RequiresBrowserReview = $false,
+
+        [Parameter(Mandatory = $false)]
+        [int] $TimeoutSeconds = 20
+    )
+
+    $check = Invoke-UckkHttpReadOnlyCheck -Url $Url -TimeoutSeconds $TimeoutSeconds
+
+    $warnings = @()
+    $errors = @()
+
+    if ($RequiresBrowserReview) {
+        $warnings += 'Cette page peut dépendre de JavaScript ou AJAX. Une vérification navigateur peut être nécessaire.'
+    }
+
+    if (-not $check.success) {
+        if ([string]::IsNullOrWhiteSpace($check.error)) {
+            $errors += "La page ne répond pas correctement : $Url"
+        } else {
+            $errors += $check.error
+}
+
+        return New-UckkTestActionResult `
+            -Success $false `
+            -Status 'Échoué' `
+            -Action "Tester $Name" `
+            -Target $Target `
+            -DangerLevel 1 `
+            -Mode 'test' `
+            -Summary "Le test de page a échoué : $Name." `
+            -Warnings $warnings `
+            -Errors $errors `
+            -NextStep 'Vérifier l URL, le serveur ou Moodle, puis relancer le test.' `
+            -Data $check
+    }
+
+    $status = if ($warnings.Count -gt 0) {
+        'Réussi avec avertissements'
+    } else {
+        'Réussi'
+    }
+
+    $nextStep = if ($RequiresBrowserReview) {
+        "Ouvrir dans le navigateur : $Url"
+    } else {
+        'Aucune action requise.'
+    }
+
+    return New-UckkTestActionResult `
+        -Success $true `
+        -Status $status `
+        -Action "Tester $Name" `
+        -Target $Target `
+        -DangerLevel 1 `
+        -Mode 'test' `
+        -Summary "La page répond : $Name. Code HTTP : $($check.statusCode)." `
+        -Warnings $warnings `
+        -Errors @() `
+        -NextStep $nextStep `
+        -Data $check
+}
+
+function Invoke-UckkUrlTestSet {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [object[]] $Urls,
+
+        [Parameter(Mandatory = $false)]
+        [string] $Action = 'Tester les pages',
+
+        [Parameter(Mandatory = $false)]
+        [string] $Target = 'aucune cible modifiée',
+
+        [Parameter(Mandatory = $false)]
+        [int] $TimeoutSeconds = 20
+    )
+
+    $results = @()
+    $warnings = @()
+    $errors = @()
+
+    foreach ($item in $Urls) {
+        $result = Test-UckkConfiguredUrl `
+            -Name ([string]$item.name) `
+            -Url ([string]$item.url) `
+            -Target ([string]$item.target) `
+            -RequiresBrowserReview ([bool]$item.requiresBrowserReview) `
+            -TimeoutSeconds $TimeoutSeconds
+
+        $results += $result
+
+        if ($result.warnings.Count -gt 0) {
+            $warnings += $result.warnings
+        }
+
+        if (-not $result.success) {
+            $errors += "$($item.name) : $($result.errors -join '; ')"
+        }
+    }
+
+    $successCount = @($results | Where-Object { $_.success }).Count
+    $failureCount = @($results | Where-Object { -not $_.success }).Count
+    $browserCount = @($Urls | Where-Object { $_.requiresBrowserReview }).Count
+
+    $finalSuccess = ($failureCount -eq 0)
+
+    $status = if (-not $finalSuccess) {
+        'Échoué'
+    } elseif ($warnings.Count -gt 0) {
+        'Réussi avec avertissements'
+    } else {
+        'Réussi'
+    }
+
+    $summary = if (-not $finalSuccess) {
+        "$successCount page(s) répondent, $failureCount page(s) échouent."
+    } else {
+        "$successCount page(s) testées avec succès."
+    }
+
+    $nextStep = if (-not $finalSuccess) {
+        'Lire les erreurs, corriger les pages ou services concernés, puis relancer les tests.'
+    } elseif ($browserCount -gt 0) {
+        'Ouvrir les pages signalées dans le navigateur pour confirmer l affichage.'
+    } else {
+        'Aucune action requise.'
+    }
+
+    return New-UckkTestActionResult `
+        -Success $finalSuccess `
+        -Status $status `
+        -Action $Action `
+        -Target $Target `
+        -DangerLevel 1 `
+        -Mode 'test' `
+        -Summary $summary `
+        -Warnings @($warnings | Select-Object -Unique) `
+        -Errors @($errors) `
+        -NextStep $nextStep `
+        -Data @{
+            successCount = $successCount
+            failureCount = $failureCount
+            browserReviewCount = $browserCount
+            results = @($results)
+        }
+}
+
+function Invoke-UckkLocalPageTests {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $false)]
+        [object] $Config,
+
+        [Parameter(Mandatory = $false)]
+        [int] $TimeoutSeconds = 20
+    )
+
+    $urls = Get-UckkConfiguredTestUrls -Config $Config -Target 'local'
+
+    return Invoke-UckkUrlTestSet `
+        -Urls $urls `
+        -Action 'Tester les pages locales' `
+        -Target 'local' `
+        -TimeoutSeconds $TimeoutSeconds
+}
+
+function Invoke-UckkServerPageTests {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $false)]
+        [object] $Config,
+
+        [Parameter(Mandatory = $false)]
+        [int] $TimeoutSeconds = 20
+    )
+
+    $urls = Get-UckkConfiguredTestUrls -Config $Config -Target 'server'
+
+    return Invoke-UckkUrlTestSet `
+        -Urls $urls `
+        -Action 'Tester les pages serveur' `
+        -Target 'serveur' `
+        -TimeoutSeconds $TimeoutSeconds
+}
+
+function Invoke-UckkAllPageTests {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $false)]
+        [object] $Config,
+
+        [Parameter(Mandatory = $false)]
+        [int] $TimeoutSeconds = 20
+    )
+
+    $urls = Get-UckkConfiguredTestUrls -Config $Config -Target 'all'
+
+    return Invoke-UckkUrlTestSet `
+        -Urls $urls `
+        -Action 'Tester les pages locales et serveur' `
+        -Target 'local et serveur' `
+        -TimeoutSeconds $TimeoutSeconds
+}
+
+function Test-UckkLocalMediathequePage {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $false)]
+        [object] $Config,
+
+        [Parameter(Mandatory = $false)]
+        [int] $TimeoutSeconds = 20
+    )
+
+    $localBase = [string](Get-UckkTestConfigValue -Config $Config -Path @('urls', 'localBase') -Default 'http://localhost:8000')
+    $url = [string](Get-UckkTestConfigValue -Config $Config -Path @('urls', 'localMediatheque') -Default (Join-UckkUrl -BaseUrl $localBase -Path '/local/uckk/mediatheque.php'))
+
+    return Test-UckkConfiguredUrl `
+        -Name 'Médiathèque locale' `
+        -Url $url `
+        -Target 'Médiathèque locale' `
+        -RequiresBrowserReview $true `
+        -TimeoutSeconds $TimeoutSeconds
+}
+
+function Test-UckkServerMediathequePage {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $false)]
+        [object] $Config,
+
+        [Parameter(Mandatory = $false)]
+        [int] $TimeoutSeconds = 20
+    )
+
+    $serverBase = [string](Get-UckkTestConfigValue -Config $Config -Path @('urls', 'serverBase') -Default 'https://uckk.org')
+    $url = [string](Get-UckkTestConfigValue -Config $Config -Path @('urls', 'serverMediatheque') -Default (Join-UckkUrl -BaseUrl $serverBase -Path '/local/uckk/mediatheque.php'))
+
+    return Test-UckkConfiguredUrl `
+        -Name 'Médiathèque serveur' `
+        -Url $url `
+        -Target 'Médiathèque serveur' `
+        -RequiresBrowserReview $true `
+        -TimeoutSeconds $TimeoutSeconds
+}
+
+function Test-UckkLocalCourseIndex {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $false)]
+        [object] $Config,
+
+        [Parameter(Mandatory = $false)]
+        [int] $TimeoutSeconds = 20
+    )
+
+    $localBase = [string](Get-UckkTestConfigValue -Config $Config -Path @('urls', 'localBase') -Default 'http://localhost:8000')
+    $url = [string](Get-UckkTestConfigValue -Config $Config -Path @('urls', 'localCourseIndex') -Default (Join-UckkUrl -BaseUrl $localBase -Path '/course/index.php'))
+
+    return Test-UckkConfiguredUrl `
+        -Name 'Index des cours local' `
+        -Url $url `
+        -Target 'local' `
+        -RequiresBrowserReview $true `
+        -TimeoutSeconds $TimeoutSeconds
+}
+
+function Test-UckkServerCourseIndex {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $false)]
+        [object] $Config,
+
+        [Parameter(Mandatory = $false)]
+        [int] $TimeoutSeconds = 20
+    )
+
+    $serverBase = [string](Get-UckkTestConfigValue -Config $Config -Path @('urls', 'serverBase') -Default 'https://uckk.org')
+    $url = [string](Get-UckkTestConfigValue -Config $Config -Path @('urls', 'serverCourseIndex') -Default (Join-UckkUrl -BaseUrl $serverBase -Path '/course/index.php'))
+
+    return Test-UckkConfiguredUrl `
+        -Name 'Index des cours serveur' `
+        -Url $url `
+        -Target 'serveur' `
+        -RequiresBrowserReview $true `
+        -TimeoutSeconds $TimeoutSeconds
+}
+
+function Test-UckkMediathequeServiceConfigured {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $false)]
+        [object] $Config
+    )
+
+    $serviceName = [string](Get-UckkTestConfigValue -Config $Config -Path @('mediatheque', 'serviceName') -Default '')
+
+    if ([string]::IsNullOrWhiteSpace($serviceName)) {
+        return New-UckkTestActionResult `
+            -Success $false `
+            -Status 'Échoué' `
+            -Action 'Vérifier service Médiathèque configuré' `
+            -Target 'configuration' `
+            -DangerLevel 1 `
+            -Mode 'test' `
+            -Summary 'Le nom technique du service Médiathèque est absent de la configuration.' `
+            -Errors @('mediatheque.serviceName est vide ou absent.') `
+            -NextStep 'Renseigner mediatheque.serviceName dans la configuration.' `
+            -Data @{
+                serviceName = $serviceName
+            }
+    }
+
+    return New-UckkTestActionResult `
+        -Success $true `
+        -Status 'Réussi' `
+        -Action 'Vérifier service Médiathèque configuré' `
+        -Target 'configuration' `
+        -DangerLevel 1 `
+        -Mode 'test' `
+        -Summary "Service Médiathèque configuré : $serviceName." `
+        -Warnings @('Ce test vérifie la configuration du nom du service, pas l appel AJAX authentifié complet.') `
+        -NextStep 'Tester la page Médiathèque et vérifier le chargement des cartes dans le navigateur.' `
+        -Data @{
+            serviceName = $serviceName
+        }
+}
+
+function Invoke-UckkMediathequeTests {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $false)]
+        [object] $Config,
+
+        [Parameter(Mandatory = $false)]
+        [ValidateSet('local', 'server', 'all')]
+        [string] $Target = 'all',
+
+        [Parameter(Mandatory = $false)]
+        [int] $TimeoutSeconds = 20
+    )
+
+    $results = @()
+    $warnings = @()
+    $errors = @()
+
+    $serviceConfig = Test-UckkMediathequeServiceConfigured -Config $Config
+    $results += $serviceConfig
+
+    if ($serviceConfig.warnings.Count -gt 0) {
+        $warnings += $serviceConfig.warnings
+    }
+
+    if (-not $serviceConfig.success) {
+        $errors += $serviceConfig.errors
+    }
+
+    if ($Target -in @('local', 'all')) {
+        $localPage = Test-UckkLocalMediathequePage -Config $Config -TimeoutSeconds $TimeoutSeconds
+        $results += $localPage
+
+        if ($localPage.warnings.Count -gt 0) {
+            $warnings += $localPage.warnings
+        }
+
+        if (-not $localPage.success) {
+            $errors += $localPage.errors
+        }
+}
+
+
+    if ($Target -in @('server', 'all')) {
+        $serverPage = Test-UckkServerMediathequePage -Config $Config -TimeoutSeconds $TimeoutSeconds
+        $results += $serverPage
+
+        if ($serverPage.warnings.Count -gt 0) {
+            $warnings += $serverPage.warnings
+        }
+
+        if (-not $serverPage.success) {
+            $errors += $serverPage.errors
+        }
+    }
+
+    $successCount = @($results | Where-Object { $_.success }).Count
+    $failureCount = @($results | Where-Object { -not $_.success }).Count
+
+    $finalSuccess = ($failureCount -eq 0)
+
+    $status = if (-not $finalSuccess) {
+        'Échoué'
+    } elseif ($warnings.Count -gt 0) {
+        'Réussi avec avertissements'
+    } else {
+        'Réussi'
+    }
+
+    $summary = if (-not $finalSuccess) {
+        "$successCount test(s) Médiathèque réussis, $failureCount échec(s)."
+    } else {
+        "$successCount test(s) Médiathèque réussis."
+    }
+
+    return New-UckkTestActionResult `
+        -Success $finalSuccess `
+        -Status $status `
+        -Action 'Tester la Médiathèque' `
+        -Target $Target `
+        -DangerLevel 1 `
+        -Mode 'test' `
+        -Summary $summary `
+        -Warnings @($warnings | Select-Object -Unique) `
+        -Errors @($errors) `
+        -NextStep 'Vérifier les cartes Médiathèque dans le navigateur si une page répond.' `
+        -Data @{
+            target = $Target
+            successCount = $successCount
+            failureCount = $failureCount
+            results = @($results)
+        }
+}
+
+function Test-UckkConfiguredPathsReadOnly {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $false)]
+        [object] $Config
+    )
+
+    $pathsToCheck = @(
+        [pscustomobject]@{
+            name = 'Source locale UCKK Moodle'
+            key  = 'paths.uckkMoodleSource'
+            path = [string](Get-UckkTestConfigValue -Config $Config -Path @('paths', 'uckkMoodleSource') -Default '')
+            required = $true
+        },
+        [pscustomobject]@{
+            name = 'Runtime Moodle local'
+            key  = 'paths.localMoodleRuntime'
+            path = [string](Get-UckkTestConfigValue -Config $Config -Path @('paths', 'localMoodleRuntime') -Default '')
+            required = $true
+        },
+        [pscustomobject]@{
+            name = 'Dossier reports'
+            key  = 'paths.reportsDir'
+            path = [string](Get-UckkTestConfigValue -Config $Config -Path @('paths', 'reportsDir') -Default './reports')
+            required = $false
+        },
+        [pscustomobject]@{
+            name = 'Dossier logs'
+            key  = 'paths.logsDir'
+            path = [string](Get-UckkTestConfigValue -Config $Config -Path @('paths', 'logsDir') -Default './logs')
+            required = $false
+        }
+    )
+
+    $results = @()
+    $warnings = @()
+    $errors = @()
+
+    foreach ($item in $pathsToCheck) {
+        $exists = $false
+
+        if (-not [string]::IsNullOrWhiteSpace($item.path)) {
+            $exists = Test-Path -LiteralPath $item.path
+        }
+
+        $row = [pscustomobject]@{
+            name = $item.name
+            key = $item.key
+            path = $item.path
+            required = $item.required
+            exists = $exists
+        }
+
+        $results += $row
+
+        if ($item.required -and -not $exists) {
+            $errors += "$($item.key) est introuvable : $($item.path)"
+        } elseif (-not $item.required -and -not $exists) {
+            $warnings += "$($item.key) est introuvable ou sera créé par une autre action si autorisé : $($item.path)"
+        }
+    }
+
+    $success = ($errors.Count -eq 0)
+
+    $status = if (-not $success) {
+        'Échoué'
+    } elseif ($warnings.Count -gt 0) {
+        'Réussi avec avertissements'
+    } else {
+        'Réussi'
+    }
+
+    $summary = if ($success) {
+        'Les chemins requis testés existent.'
+    } else {
+        'Un ou plusieurs chemins requis sont introuvables.'
+    }
+
+    $nextStep = if ($success) {
+        'Aucune action requise.'
+    } else {
+        'Corriger la configuration des chemins, puis relancer le test.'
+    }
+
+    return New-UckkTestActionResult `
+        -Success $success `
+        -Status $status `
+        -Action 'Tester les chemins configurés' `
+        -Target 'configuration locale' `
+        -DangerLevel 1 `
+        -Mode 'test' `
+        -Summary $summary `
+        -Warnings $warnings `
+        -Errors $errors `
+        -NextStep $nextStep `
+        -Data @{
+            paths = @($results)
+        }
+}
+
+function Invoke-UckkSmokeTests {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $false)]
+        [object] $Config,
+
+        [Parameter(Mandatory = $false)]
+        [ValidateSet('local', 'server', 'all')]
+        [string] $Target = 'all',
+
+        [Parameter(Mandatory = $false)]
+        [int] $TimeoutSeconds = 20
+    )
+
+    $results = @()
+    $warnings = @()
+    $errors = @()
+
+    if ($Target -in @('local', 'all')) {
+        $paths = Test-UckkConfiguredPathsReadOnly -Config $Config
+        $results += $paths
+
+        if ($paths.warnings.Count -gt 0) {
+            $warnings += $paths.warnings
+        }
+
+        if (-not $paths.success) {
+            $errors += $paths.errors
+        }
+    }
+
+    if ($Target -eq 'local') {
+        $pages = Invoke-UckkLocalPageTests -Config $Config -TimeoutSeconds $TimeoutSeconds
+    } elseif ($Target -eq 'server') {
+        $pages = Invoke-UckkServerPageTests -Config $Config -TimeoutSeconds $TimeoutSeconds
+    } else {
+        $pages = Invoke-UckkAllPageTests -Config $Config -TimeoutSeconds $TimeoutSeconds
+    }
+
+    $results += $pages
+
+    if ($pages.warnings.Count -gt 0) {
+        $warnings += $pages.warnings
+    }
+
+    if (-not $pages.success) {
+        $errors += $pages.errors
+    }
+
+    $mediatheque = Invoke-UckkMediathequeTests -Config $Config -Target $Target -TimeoutSeconds $TimeoutSeconds
+    $results += $mediatheque
+
+    if ($mediatheque.warnings.Count -gt 0) {
+        $warnings += $mediatheque.warnings
+    }
+
+    if (-not $mediatheque.success) {
+        $errors += $mediatheque.errors
+    }
+
+    $successCount = @($results | Where-Object { $_.success }).Count
+    $failureCount = @($results | Where-Object { -not $_.success }).Count
+
+    $finalSuccess = ($failureCount -eq 0)
+
+    $status = if (-not $finalSuccess) {
+        'Échoué'
+    } elseif ($warnings.Count -gt 0) {
+        'Réussi avec avertissements'
+    } else {
+        'Réussi'
+    }
+
+    $summary = if ($finalSuccess) {
+        "$successCount groupe(s) de tests réussis."
+    } else {
+        "$successCount groupe(s) de tests réussis, $failureCount groupe(s) en échec."
+    }
+
+    $nextStep = if (-not $finalSuccess) {
+        'Lire les erreurs, corriger les problèmes, puis relancer les tests.'
+    } elseif ($warnings.Count -gt 0) {
+        'Ouvrir les pages signalées dans le navigateur pour confirmer l affichage.'
+    } else {
+        'Aucune action requise.'
+    }
+
+    return New-UckkTestActionResult `
+        -Success $finalSuccess `
+        -Status $status `
+        -Action 'Lancer les tests importants' `
+        -Target $Target `
+        -DangerLevel 1 `
+        -Mode 'test' `
+        -Summary $summary `
+        -Warnings @($warnings | Select-Object -Unique) `
+        -Errors @($errors) `
+        -NextStep $nextStep `
+        -Data @{
+            target = $Target
+            successCount = $successCount
+            failureCount = $failureCount
+            results = @($results)
+        }
+}
+
+Export-ModuleMember -Function @(
+    'Get-UckkConfiguredTestUrls',
+    'Invoke-UckkHttpReadOnlyCheck',
+    'Test-UckkConfiguredUrl',
+    'Invoke-UckkLocalPageTests',
+    'Invoke-UckkServerPageTests',
+    'Invoke-UckkAllPageTests',
+    'Test-UckkLocalMediathequePage',
+    'Test-UckkServerMediathequePage',
+    'Test-UckkLocalCourseIndex',
+    'Test-UckkServerCourseIndex',
+    'Test-UckkMediathequeServiceConfigured',
+    'Invoke-UckkMediathequeTests',
+    'Test-UckkConfiguredPathsReadOnly',
+    'Invoke-UckkSmokeTests'
+)
+

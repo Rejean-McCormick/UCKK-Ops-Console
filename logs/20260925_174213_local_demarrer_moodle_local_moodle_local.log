@@ -1,0 +1,64 @@
+UCKK Ops Console — log technique
+
+Début : 2026-09-25 17:42:13
+Action : Démarrer Moodle local
+Domaine : local
+Cible : Moodle local
+
+Entrées
+-------
+[2026-09-25 17:42:13] [INFO] Réussi — Moodle local répond déjà : http://127.0.0.1:8000
+Données :
+{
+  "success": true,
+  "status": "Réussi",
+  "action": "Démarrer Moodle local",
+  "domain": "local",
+  "target": "Moodle local",
+  "dangerLevel": 2,
+  "mode": "application",
+  "summary": "Réussi — Moodle local répond déjà : http://127.0.0.1:8000",
+  "warnings": [],
+  "errors": [],
+  "nextStep": "Ouvrir Moodle local ou tester les pages locales.",
+  "reportPath": "",
+  "logPath": "",
+  "data": {
+    "baseUrl": "http://127.0.0.1:8000",
+    "localRuntime": "C:\\mycode\\UCKK\\moodle\\moodle\\public",
+    "phpBinary": "php",
+    "alreadyReady": true,
+    "check": {
+      "success": true,
+      "url": "http://127.0.0.1:8000",
+      "statusCode": 200,
+      "detail": "OK"
+    }
+  },
+  "steps": [
+    {
+      "name": "Vérifier Moodle local",
+      "status": "Réussi",
+      "summary": "Moodle local répond déjà.",
+      "detail": "http://127.0.0.1:8000",
+      "data": {
+        "success": true,
+        "url": "http://127.0.0.1:8000",
+        "statusCode": 200,
+        "detail": "OK"
+      },
+      "timestamp": "2026-09-25 17:42:13"
+    }
+  ],
+  "startedAt": "2026-09-25 17:42:12",
+  "finishedAt": "2026-09-25 17:42:13",
+  "durationSeconds": 1.0
+}
+
+
+Fin
+---
+Fin : 2026-09-25 17:42:13
+Statut : Terminé
+Résumé : Réussi — Moodle local répond déjà : http://127.0.0.1:8000
+

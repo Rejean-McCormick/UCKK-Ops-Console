@@ -1,0 +1,978 @@
+UCKK Ops Console — log technique
+
+Début : 2026-09-24 21:16:41
+Action : Préparer local et ouvrir Moodle
+Domaine : local
+Cible : Moodle local + base locale
+
+Entrées
+-------
+[2026-09-24 21:16:41] [INFO] La chaîne locale est terminée. Moodle local est à jour et UCKK a été ouvert.
+Données :
+{
+  "success": true,
+  "status": "Réussi",
+  "action": "Préparer local et ouvrir Moodle",
+  "domain": "local",
+  "target": "Moodle local + base locale",
+  "dangerLevel": 3,
+  "mode": "application",
+  "summary": "La chaîne locale est terminée. Moodle local est à jour et UCKK a été ouvert.",
+  "warnings": null,
+  "errors": null,
+  "nextStep": "Tester ensuite UCC et Math, ou lancer le diagnostic du switcher.",
+  "reportPath": "",
+  "logPath": "",
+  "data": {
+    "completed": [
+      {
+        "id": "configuration.verify",
+        "label": "Verifier la configuration",
+        "status": "Reussi",
+        "summary": "Configuration valide.",
+        "result": {
+          "success": true,
+          "status": "Reussi",
+          "action": "Verifier la configuration",
+          "domain": "configuration",
+          "target": "configuration",
+          "dangerLevel": 1,
+          "mode": "verification",
+          "summary": "Configuration valide.",
+          "warnings": [],
+          "errors": [],
+          "nextStep": "Aucune action requise.",
+          "reportPath": "",
+          "logPath": "",
+          "data": {
+            "configPath": "C:\\mycode\\UCKK\\UCKK_ops_console\\config\\uckk-ops-console.config.json",
+            "validation": {
+              "success": true,
+              "status": "Reussi",
+              "issues": [],
+              "errors": [],
+              "warnings": []
+            }
+          }
+        }
+      },
+      {
+        "id": "local.verify.paths",
+        "label": "Vérifier les chemins locaux",
+        "status": "Réussi",
+        "summary": "Réussi — les chemins locaux obligatoires sont présents.",
+        "result": {
+          "success": true,
+          "status": "Réussi",
+          "action": "Vérifier les chemins locaux",
+          "domain": "local",
+          "target": "local",
+          "dangerLevel": 1,
+          "mode": "vérification",
+          "summary": "Réussi — les chemins locaux obligatoires sont présents.",
+          "warnings": [],
+          "errors": [],
+          "nextStep": "Synchroniser source vers Moodle local si nécessaire.",
+          "reportPath": "",
+          "logPath": "",
+          "data": {
+            "checks": [
+              {
+                "label": "Racine de l application",
+                "key": "app.root",
+                "path": "C:\\mycode\\UCKK\\UCKK_ops_console",
+                "exists": true,
+                "status": "Réussi",
+                "detail": "Chemin trouvé."
+              },
+              {
+                "label": "Source Git locale",
+                "key": "paths.uckkMoodleSource",
+                "path": "C:\\mycode\\UCKK\\uckk-moodle",
+                "exists": true,
+                "status": "Réussi",
+                "detail": "Chemin trouvé."
+              },
+              {
+                "label": "Moodle local",
+                "key": "paths.localMoodleRoot",
+                "path": "C:\\mycode\\UCKK\\moodle\\moodle",
+                "exists": true,
+                "status": "Réussi",
+                "detail": "Chemin trouvé."
+              },
+              {
+                "label": "Dossier exécuté par Moodle local",
+                "key": "paths.localMoodleRuntime",
+                "path": "C:\\mycode\\UCKK\\moodle\\moodle\\public",
+                "exists": true,
+                "status": "Réussi",
+                "detail": "Chemin trouvé."
+              },
+              {
+                "label": "Dossier des rapports",
+                "key": "reports.dir",
+                "path": "C:\\mycode\\UCKK\\UCKK_ops_console\\reports",
+                "exists": true,
+                "status": "Réussi",
+                "detail": "Chemin trouvé."
+              },
+              {
+                "label": "Dossier des logs",
+                "key": "logs.dir",
+                "path": "C:\\mycode\\UCKK\\UCKK_ops_console\\logs",
+                "exists": true,
+                "status": "Réussi",
+                "detail": "Chemin trouvé."
+              },
+              {
+                "label": "URL locale",
+                "key": "urls.localBase",
+                "path": "http://127.0.0.1:8000",
+                "exists": true,
+                "status": "Réussi",
+                "detail": "URL configurée."
+              }
+            ]
+          },
+          "steps": [
+            {
+              "name": "Racine de l application",
+              "status": "Réussi",
+              "summary": "Chemin trouvé.",
+              "detail": "C:\\mycode\\UCKK\\UCKK_ops_console",
+              "data": null,
+              "timestamp": "2026-09-24 21:15:07"
+            },
+            {
+              "name": "Source Git locale",
+              "status": "Réussi",
+              "summary": "Chemin trouvé.",
+              "detail": "C:\\mycode\\UCKK\\uckk-moodle",
+              "data": null,
+              "timestamp": "2026-09-24 21:15:07"
+            },
+            {
+              "name": "Moodle local",
+              "status": "Réussi",
+              "summary": "Chemin trouvé.",
+              "detail": "C:\\mycode\\UCKK\\moodle\\moodle",
+              "data": null,
+              "timestamp": "2026-09-24 21:15:07"
+            },
+            {
+              "name": "Dossier exécuté par Moodle local",
+              "status": "Réussi",
+              "summary": "Chemin trouvé.",
+              "detail": "C:\\mycode\\UCKK\\moodle\\moodle\\public",
+              "data": null,
+              "timestamp": "2026-09-24 21:15:07"
+            },
+            {
+              "name": "Dossier des rapports",
+              "status": "Réussi",
+              "summary": "Chemin trouvé.",
+              "detail": "C:\\mycode\\UCKK\\UCKK_ops_console\\reports",
+              "data": null,
+              "timestamp": "2026-09-24 21:15:07"
+            },
+            {
+              "name": "Dossier des logs",
+              "status": "Réussi",
+              "summary": "Chemin trouvé.",
+              "detail": "C:\\mycode\\UCKK\\UCKK_ops_console\\logs",
+              "data": null,
+              "timestamp": "2026-09-24 21:15:07"
+            },
+            {
+              "name": "URL locale",
+              "status": "Réussi",
+              "summary": "URL configurée.",
+              "detail": "http://127.0.0.1:8000",
+              "data": null,
+              "timestamp": "2026-09-24 21:15:07"
+            }
+          ],
+          "startedAt": "2026-09-24 21:15:07",
+          "finishedAt": "2026-09-24 21:15:07",
+          "durationSeconds": 0.0
+        }
+      },
+      {
+        "id": "local.moodle_diagnostic",
+        "label": "Diagnostiquer Moodle local",
+        "status": "Réussi",
+        "summary": "Réussi — Moodle CLI est prêt. Racine CLI : C:\\mycode\\UCKK\\moodle\\moodle",
+        "result": {
+          "success": true,
+          "status": "Réussi",
+          "action": "Diagnostiquer Moodle local",
+          "domain": "local",
+          "target": "Moodle local",
+          "dangerLevel": 1,
+          "mode": "vérification",
+          "summary": "Réussi — Moodle CLI est prêt. Racine CLI : C:\\mycode\\UCKK\\moodle\\moodle",
+          "warnings": [],
+          "errors": [],
+          "nextStep": "Synchroniser les plugins puis lancer l upgrade Moodle local.",
+          "reportPath": "",
+          "logPath": "",
+          "data": {
+            "phpBinary": "php",
+            "phpCheck": {
+              "success": true,
+              "timedOut": false,
+              "exitCode": 0,
+              "stdout": "PHP 8.4.21 (cli) (built: May  6 2026 09:30:51) (NTS Visual C++ 2022 x64)\nCopyright (c) The PHP Group\nBuilt by The PHP Group\nZend Engine v4.4.21, Copyright (c) Zend Technologies\n    with Zend OPcache v8.4.21, Copyright (c), by Zend Technologies\n",
+              "stderr": "",
+              "filePath": "php",
+              "arguments": [
+                "-v"
+              ],
+              "workingDir": "C:\\mycode\\UCKK\\moodle\\moodle",
+              "timeoutSeconds": 30,
+              "commandLine": "php -v",
+              "startedAt": "2026-09-24 21:15:07.682",
+              "finishedAt": "2026-09-24 21:15:07.940",
+              "durationSeconds": 0.258
+            },
+            "releaseInfo": {
+              "success": true,
+              "versionFile": "C:\\mycode\\UCKK\\moodle\\moodle\\public\\version.php",
+              "versionFileCandidates": [
+                "C:\\mycode\\UCKK\\moodle\\moodle\\public\\version.php",
+                "C:\\mycode\\UCKK\\moodle\\moodle\\version.php"
+              ],
+              "version": "2026042003.01",
+              "release": "5.2.3+ (Build: 20260916)",
+              "branch": "502",
+              "maturity": "MATURITY_STABLE",
+              "isUnstable": false,
+              "allowUnstableRequired": false,
+              "parseMethod": "line-assignment",
+              "parseError": ""
+            },
+            "upgradeContext": {
+              "success": true,
+              "scriptRelativePath": "admin/cli/upgrade.php",
+              "cliRoot": "C:\\mycode\\UCKK\\moodle\\moodle",
+              "scriptPath": "C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\upgrade.php",
+              "localMoodleRoot": "C:\\mycode\\UCKK\\moodle\\moodle",
+              "localMoodleRuntime": "C:\\mycode\\UCKK\\moodle\\moodle\\public",
+              "candidateRoots": [
+                "C:\\mycode\\UCKK\\moodle\\moodle",
+                "C:\\mycode\\UCKK\\moodle\\moodle\\public"
+              ],
+              "probes": [
+                {
+                  "root": "C:\\mycode\\UCKK\\moodle\\moodle",
+                  "script": "C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\upgrade.php",
+                  "scriptExists": true,
+                  "rootExists": true
+                },
+                {
+                  "root": "C:\\mycode\\UCKK\\moodle\\moodle\\public",
+                  "script": "C:\\mycode\\UCKK\\moodle\\moodle\\public\\admin\\cli\\upgrade.php",
+                  "scriptExists": false,
+                  "rootExists": true
+                }
+              ],
+              "configProbes": [
+                {
+                  "path": "C:\\mycode\\UCKK\\moodle\\moodle\\config.php",
+                  "exists": true
+                },
+                {
+                  "path": "C:\\mycode\\UCKK\\moodle\\moodle\\public\\config.php",
+                  "exists": true
+                }
+              ]
+            },
+            "purgeContext": {
+              "success": true,
+              "scriptRelativePath": "admin/cli/purge_caches.php",
+              "cliRoot": "C:\\mycode\\UCKK\\moodle\\moodle",
+              "scriptPath": "C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\purge_caches.php",
+              "localMoodleRoot": "C:\\mycode\\UCKK\\moodle\\moodle",
+              "localMoodleRuntime": "C:\\mycode\\UCKK\\moodle\\moodle\\public",
+              "candidateRoots": [
+                "C:\\mycode\\UCKK\\moodle\\moodle",
+                "C:\\mycode\\UCKK\\moodle\\moodle\\public"
+              ],
+              "probes": [
+                {
+                  "root": "C:\\mycode\\UCKK\\moodle\\moodle",
+                  "script": "C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\purge_caches.php",
+                  "scriptExists": true,
+                  "rootExists": true
+                },
+                {
+                  "root": "C:\\mycode\\UCKK\\moodle\\moodle\\public",
+                  "script": "C:\\mycode\\UCKK\\moodle\\moodle\\public\\admin\\cli\\purge_caches.php",
+                  "scriptExists": false,
+                  "rootExists": true
+                }
+              ],
+              "configProbes": [
+                {
+                  "path": "C:\\mycode\\UCKK\\moodle\\moodle\\config.php",
+                  "exists": true
+                },
+                {
+                  "path": "C:\\mycode\\UCKK\\moodle\\moodle\\public\\config.php",
+                  "exists": true
+                }
+              ]
+            }
+          },
+          "steps": [
+            {
+              "name": "Vérifier PHP CLI",
+              "status": "Réussi",
+              "summary": "PHP CLI répond.",
+              "detail": "Commande : php -v\r\nDossier courant : C:\\mycode\\UCKK\\moodle\\moodle\r\nCode de sortie : 0\r\nTimeout : False\r\nDurée : 0.258 s\r\n\r\nSTDOUT :\r\nPHP 8.4.21 (cli) (built: May  6 2026 09:30:51) (NTS Visual C++ 2022 x64)\nCopyright (c) The PHP Group\nBuilt by The PHP Group\nZend Engine v4.4.21, Copyright (c) Zend Technologies\n    with Zend OPcache v8.4.21, Copyright (c), by Zend Technologies\r\n\r\nSTDERR :\r\n(vide)",
+              "data": {
+                "success": true,
+                "timedOut": false,
+                "exitCode": 0,
+                "stdout": "PHP 8.4.21 (cli) (built: May  6 2026 09:30:51) (NTS Visual C++ 2022 x64)\nCopyright (c) The PHP Group\nBuilt by The PHP Group\nZend Engine v4.4.21, Copyright (c) Zend Technologies\n    with Zend OPcache v8.4.21, Copyright (c), by Zend Technologies\n",
+                "stderr": "",
+                "filePath": "php",
+                "arguments": [
+                  "-v"
+                ],
+                "workingDir": "C:\\mycode\\UCKK\\moodle\\moodle",
+                "timeoutSeconds": 30,
+                "commandLine": "php -v",
+                "startedAt": "2026-09-24 21:15:07.682",
+                "finishedAt": "2026-09-24 21:15:07.940",
+                "durationSeconds": 0.258
+              },
+              "timestamp": "2026-09-24 21:15:07"
+            },
+            {
+              "name": "Lire version et maturité Moodle",
+              "status": "Réussi",
+              "summary": "Maturité Moodle : MATURITY_STABLE",
+              "detail": "version.php retenu : C:\\mycode\\UCKK\\moodle\\moodle\\public\\version.php\r\nversion.php testés :\r\n- C:\\mycode\\UCKK\\moodle\\moodle\\public\\version.php => trouvé\r\n- C:\\mycode\\UCKK\\moodle\\moodle\\version.php => absent\r\nVersion : 2026042003.01\r\nRelease : 5.2.3+ (Build: 20260916)\r\nBranche : 502\r\nMaturité : MATURITY_STABLE\r\n--allow-unstable requis : False\r\nMéthode de lecture : line-assignment",
+              "data": {
+                "success": true,
+                "versionFile": "C:\\mycode\\UCKK\\moodle\\moodle\\public\\version.php",
+                "versionFileCandidates": [
+                  "C:\\mycode\\UCKK\\moodle\\moodle\\public\\version.php",
+                  "C:\\mycode\\UCKK\\moodle\\moodle\\version.php"
+                ],
+                "version": "2026042003.01",
+                "release": "5.2.3+ (Build: 20260916)",
+                "branch": "502",
+                "maturity": "MATURITY_STABLE",
+                "isUnstable": false,
+                "allowUnstableRequired": false,
+                "parseMethod": "line-assignment",
+                "parseError": ""
+              },
+              "timestamp": "2026-09-24 21:15:07"
+            },
+            {
+              "name": "Résoudre admin/cli/upgrade.php",
+              "status": "Réussi",
+              "summary": "Script trouvé dans C:\\mycode\\UCKK\\moodle\\moodle.",
+              "detail": "Racine code configurée : C:\\mycode\\UCKK\\moodle\\moodle\r\nWebroot configuré : C:\\mycode\\UCKK\\moodle\\moodle\\public\r\nScript demandé : admin/cli/upgrade.php\r\nScript résolu : C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\upgrade.php\r\n\r\nChemins testés :\r\n- C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\upgrade.php => trouvé\r\n- C:\\mycode\\UCKK\\moodle\\moodle\\public\\admin\\cli\\upgrade.php => absent\r\n\r\nconfig.php testés :\r\n- C:\\mycode\\UCKK\\moodle\\moodle\\config.php => trouvé\r\n- C:\\mycode\\UCKK\\moodle\\moodle\\public\\config.php => trouvé",
+              "data": {
+                "success": true,
+                "scriptRelativePath": "admin/cli/upgrade.php",
+                "cliRoot": "C:\\mycode\\UCKK\\moodle\\moodle",
+                "scriptPath": "C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\upgrade.php",
+                "localMoodleRoot": "C:\\mycode\\UCKK\\moodle\\moodle",
+                "localMoodleRuntime": "C:\\mycode\\UCKK\\moodle\\moodle\\public",
+                "candidateRoots": [
+                  "C:\\mycode\\UCKK\\moodle\\moodle",
+                  "C:\\mycode\\UCKK\\moodle\\moodle\\public"
+                ],
+                "probes": [
+                  {
+                    "root": "C:\\mycode\\UCKK\\moodle\\moodle",
+                    "script": "C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\upgrade.php",
+                    "scriptExists": true,
+                    "rootExists": true
+                  },
+                  {
+                    "root": "C:\\mycode\\UCKK\\moodle\\moodle\\public",
+                    "script": "C:\\mycode\\UCKK\\moodle\\moodle\\public\\admin\\cli\\upgrade.php",
+                    "scriptExists": false,
+                    "rootExists": true
+                  }
+                ],
+                "configProbes": [
+                  {
+                    "path": "C:\\mycode\\UCKK\\moodle\\moodle\\config.php",
+                    "exists": true
+                  },
+                  {
+                    "path": "C:\\mycode\\UCKK\\moodle\\moodle\\public\\config.php",
+                    "exists": true
+                  }
+                ]
+              },
+              "timestamp": "2026-09-24 21:15:07"
+            },
+            {
+              "name": "Résoudre admin/cli/purge_caches.php",
+              "status": "Réussi",
+              "summary": "Script trouvé dans C:\\mycode\\UCKK\\moodle\\moodle.",
+              "detail": "Racine code configurée : C:\\mycode\\UCKK\\moodle\\moodle\r\nWebroot configuré : C:\\mycode\\UCKK\\moodle\\moodle\\public\r\nScript demandé : admin/cli/purge_caches.php\r\nScript résolu : C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\purge_caches.php\r\n\r\nChemins testés :\r\n- C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\purge_caches.php => trouvé\r\n- C:\\mycode\\UCKK\\moodle\\moodle\\public\\admin\\cli\\purge_caches.php => absent\r\n\r\nconfig.php testés :\r\n- C:\\mycode\\UCKK\\moodle\\moodle\\config.php => trouvé\r\n- C:\\mycode\\UCKK\\moodle\\moodle\\public\\config.php => trouvé",
+              "data": {
+                "success": true,
+                "scriptRelativePath": "admin/cli/purge_caches.php",
+                "cliRoot": "C:\\mycode\\UCKK\\moodle\\moodle",
+                "scriptPath": "C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\purge_caches.php",
+                "localMoodleRoot": "C:\\mycode\\UCKK\\moodle\\moodle",
+                "localMoodleRuntime": "C:\\mycode\\UCKK\\moodle\\moodle\\public",
+                "candidateRoots": [
+                  "C:\\mycode\\UCKK\\moodle\\moodle",
+                  "C:\\mycode\\UCKK\\moodle\\moodle\\public"
+                ],
+                "probes": [
+                  {
+                    "root": "C:\\mycode\\UCKK\\moodle\\moodle",
+                    "script": "C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\purge_caches.php",
+                    "scriptExists": true,
+                    "rootExists": true
+                  },
+                  {
+                    "root": "C:\\mycode\\UCKK\\moodle\\moodle\\public",
+                    "script": "C:\\mycode\\UCKK\\moodle\\moodle\\public\\admin\\cli\\purge_caches.php",
+                    "scriptExists": false,
+                    "rootExists": true
+                  }
+                ],
+                "configProbes": [
+                  {
+                    "path": "C:\\mycode\\UCKK\\moodle\\moodle\\config.php",
+                    "exists": true
+                  },
+                  {
+                    "path": "C:\\mycode\\UCKK\\moodle\\moodle\\public\\config.php",
+                    "exists": true
+                  }
+                ]
+              },
+              "timestamp": "2026-09-24 21:15:07"
+            }
+          ],
+          "startedAt": "2026-09-24 21:15:07",
+          "finishedAt": "2026-09-24 21:15:07",
+          "durationSeconds": 0.0
+        }
+      },
+      {
+        "id": "local.sync.source_to_runtime",
+        "label": "Synchroniser source vers Moodle local",
+        "status": "Réussi",
+        "summary": "Réussi — la source a été copiée vers Moodle local. 1004 fichier(s) copiés, 2836 ignoré(s).",
+        "result": {
+          "success": true,
+          "status": "Réussi",
+          "action": "Synchroniser source vers Moodle local",
+          "domain": "local",
+          "target": "dossier exécuté par Moodle local",
+          "dangerLevel": 2,
+          "mode": "application",
+          "summary": "Réussi — la source a été copiée vers Moodle local. 1004 fichier(s) copiés, 2836 ignoré(s).",
+          "warnings": [],
+          "errors": [],
+          "nextStep": "Purger les caches locaux, puis ouvrir Moodle local.",
+          "reportPath": "",
+          "logPath": "",
+          "data": {
+            "source": "C:\\mycode\\UCKK\\uckk-moodle",
+            "target": "C:\\mycode\\UCKK\\moodle\\moodle\\public",
+            "simulation": false,
+            "copied": 1004,
+            "skipped": 2836,
+            "failed": 0,
+            "failureItems": []
+          },
+          "steps": [
+            {
+              "name": "Vérifier source locale",
+              "status": "Réussi",
+              "summary": "Source locale trouvée.",
+              "detail": "C:\\mycode\\UCKK\\uckk-moodle",
+              "data": null,
+              "timestamp": "2026-09-24 21:15:08"
+            },
+            {
+              "name": "Vérifier cible Moodle locale",
+              "status": "Réussi",
+              "summary": "Cible locale trouvée.",
+              "detail": "C:\\mycode\\UCKK\\moodle\\moodle\\public",
+              "data": null,
+              "timestamp": "2026-09-24 21:15:08"
+            },
+            {
+              "name": "Copier fichiers",
+              "status": "Réussi",
+              "summary": "1004 fichier(s) traité(s), 2836 ignoré(s).",
+              "detail": "",
+              "data": {
+                "source": "C:\\mycode\\UCKK\\uckk-moodle",
+                "target": "C:\\mycode\\UCKK\\moodle\\moodle\\public",
+                "simulation": false,
+                "copied": 1004,
+                "skipped": 2836,
+                "failed": 0,
+                "failureItems": []
+              },
+              "timestamp": "2026-09-24 21:15:13"
+            }
+          ],
+          "startedAt": "2026-09-24 21:15:08",
+          "finishedAt": "2026-09-24 21:15:13",
+          "durationSeconds": 5.0
+        }
+      },
+      {
+        "id": "local.moodle_upgrade",
+        "label": "Mettre à jour Moodle local",
+        "status": "Réussi",
+        "summary": "Réussi — Moodle local est à jour. Racine CLI utilisée : C:\\mycode\\UCKK\\moodle\\moodle",
+        "result": {
+          "success": true,
+          "status": "Réussi",
+          "action": "Mettre à jour Moodle local",
+          "domain": "local",
+          "target": "base Moodle locale",
+          "dangerLevel": 3,
+          "mode": "application",
+          "summary": "Réussi — Moodle local est à jour. Racine CLI utilisée : C:\\mycode\\UCKK\\moodle\\moodle",
+          "warnings": [],
+          "errors": [],
+          "nextStep": "Purger les caches locaux puis démarrer Moodle local.",
+          "reportPath": "",
+          "logPath": "",
+          "data": {
+            "phpBinary": "php",
+            "cliContext": {
+              "success": true,
+              "scriptRelativePath": "admin/cli/upgrade.php",
+              "cliRoot": "C:\\mycode\\UCKK\\moodle\\moodle",
+              "scriptPath": "C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\upgrade.php",
+              "localMoodleRoot": "C:\\mycode\\UCKK\\moodle\\moodle",
+              "localMoodleRuntime": "C:\\mycode\\UCKK\\moodle\\moodle\\public",
+              "candidateRoots": [
+                "C:\\mycode\\UCKK\\moodle\\moodle",
+                "C:\\mycode\\UCKK\\moodle\\moodle\\public"
+              ],
+              "probes": [
+                {
+                  "root": "C:\\mycode\\UCKK\\moodle\\moodle",
+                  "script": "C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\upgrade.php",
+                  "scriptExists": true,
+                  "rootExists": true
+                },
+                {
+                  "root": "C:\\mycode\\UCKK\\moodle\\moodle\\public",
+                  "script": "C:\\mycode\\UCKK\\moodle\\moodle\\public\\admin\\cli\\upgrade.php",
+                  "scriptExists": false,
+                  "rootExists": true
+                }
+              ],
+              "configProbes": [
+                {
+                  "path": "C:\\mycode\\UCKK\\moodle\\moodle\\config.php",
+                  "exists": true
+                },
+                {
+                  "path": "C:\\mycode\\UCKK\\moodle\\moodle\\public\\config.php",
+                  "exists": true
+                }
+              ]
+            },
+            "releaseInfo": {
+              "success": true,
+              "versionFile": "C:\\mycode\\UCKK\\moodle\\moodle\\public\\version.php",
+              "versionFileCandidates": [
+                "C:\\mycode\\UCKK\\moodle\\moodle\\public\\version.php",
+                "C:\\mycode\\UCKK\\moodle\\moodle\\version.php"
+              ],
+              "version": "2026042003.01",
+              "release": "5.2.3+ (Build: 20260916)",
+              "branch": "502",
+              "maturity": "MATURITY_STABLE",
+              "isUnstable": false,
+              "allowUnstableRequired": false,
+              "parseMethod": "line-assignment",
+              "parseError": ""
+            },
+            "upgradeArguments": [
+              "C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\upgrade.php",
+              "--non-interactive"
+            ],
+            "process": {
+              "success": true,
+              "timedOut": false,
+              "exitCode": 0,
+              "stdout": "-->aiprovider_uckk\n++ Succès (0,72 secondes) ++\n-->mod_uckkarchive\n++ Succès (2,76 secondes) ++\n-->mod_uckkassembly\n++ Succès (1,19 secondes) ++\n-->mod_uckkchallenge\n++ Succès (0,87 secondes) ++\n-->block_uckk_dashboard\n++ Succès (0,35 secondes) ++\n-->format_uckk\n++ Succès (0,48 secondes) ++\n-->report_uckk\n++ Succès (0,24 secondes) ++\n-->tool_uckkintegrity\n++ Succès (0,50 secondes) ++\n-->tool_uckkseed\n++ Succès (0,37 secondes) ++\n-->theme_uckk\n++ Succès (0,17 secondes) ++\n-->theme_ucmath\n++ Succès (0,17 secondes) ++\n-->local_uckk\n++ Succès (1,05 secondes) ++\n== Réglage des nouvelles valeurs par défaut ==\r\nNouveau réglage : block_uckk_dashboard/defaultviewmode\r\nNouveau réglage : block_uckk_dashboard/showpathway\r\nNouveau réglage : block_uckk_dashboard/showtronccommun\r\nNouveau réglage : block_uckk_dashboard/showcompetencies\r\nNouveau réglage : block_uckk_dashboard/showbadges\r\nNouveau réglage : block_uckk_dashboard/showchallenges\r\nNouveau réglage : block_uckk_dashboard/showassemblies\r\nNouveau réglage : block_uckk_dashboard/showarchive\r\nNouveau réglage : block_uckk_dashboard/showintegrity\r\nNouveau réglage : block_uckk_dashboard/showdeadlines\r\nNouveau réglage : block_uckk_dashboard/showportfolio\r\nNouveau réglage : block_uckk_dashboard/refreshinterval\r\nNouveau réglage : block_uckk_dashboard/maxsummaryitems\r\nNouveau réglage : block_uckk_dashboard/showrestrictedindicators\r\nNouveau réglage : block_uckk_dashboard/allowmanualrefresh\r\nNouveau réglage : format_uckk/showcourseidentity\r\nNouveau réglage : format_uckk/showcanonicalnotice\r\nNouveau réglage : format_uckk/showinternalrecognitionnotice\r\nNouveau réglage : format_uckk/showkoacycle\r\nNouveau réglage : format_uckk/defaultcoursestyle\r\nNouveau réglage : format_uckk/lockstandardsections\r\nNouveau réglage : format_uckk/autocreatestandardsections\r\nNouveau réglage : format_uckk/defaultsectionset\r\nNouveau réglage : format_uckk/standardsectionkeys\r\nNouveau réglage : format_uckk/showsectionicons\r\nNouveau réglage : format_uckk/showcompletionoverview\r\nNouveau réglage : format_uckk/showproofindicators\r\nNouveau réglage : format_uckk/showarchiveindicators\r\nNouveau réglage : format_uckk/showintegritymarkers\r\nNouveau réglage : format_uckk/showassemblymarkers\r\nNouveau réglage : format_uckk/showchallengemarkers\r\nNouveau réglage : format_uckk/showuckknavigation\r\nNouveau réglage : format_uckk/showcourseindexmetadata\r\nNouveau réglage : format_uckk/defaultsectiondisplay\r\nNouveau réglage : format_uckk/maxsectiontitlelength\r\nNouveau réglage : format_uckk/emphasizeproofsection\r\nNouveau réglage : format_uckk/emphasizearchivesection\r\nNouveau réglage : format_uckk/showprovenancenotice\r\nNouveau réglage : format_uckk/showintegritynotice\r\nNouveau réglage : format_uckk/showainonsovereignnotice\r\nNouveau réglage : format_uckk/linktochallengeactivity\r\nNouveau réglage : format_uckk/linktoassemblyactivity\r\nNouveau réglage : format_uckk/linktoarchiveactivity\r\nNouveau réglage : format_uckk/linktointegritytool\r\nNouveau réglage : format_uckk/showdebugmarkers\r\nNouveau réglage : format_uckk/logformatdiagnostics\r\nNouveau réglage : mod_uckkassembly/defaultenabled\r\nNouveau réglage : mod_uckkassembly/defaultassemblytype\r\nNouveau réglage : mod_uckkassembly/defaultvisibility\r\nNouveau réglage : mod_uckkassembly/allowmotionsbydefault\r\nNouveau réglage : mod_uckkassembly/allowamendmentsbydefault\r\nNouveau réglage : mod_uckkassembly/allowobjectionsbydefault\r\nNouveau réglage : mod_uckkassembly/maxamendmentspermotion\r\nNouveau réglage : mod_uckkassembly/enablevotesbydefault\r\nNouveau réglage : mod_uckkassembly/defaultvotemethod\r\nNouveau réglage : mod_uckkassembly/defaultquorumpercent\r\nNouveau réglage : mod_uckkassembly/defaultapprovalthreshold\r\nNouveau réglage : mod_uckkassembly/allowvotechange\r\nNouveau réglage : mod_uckkassembly/requirevoterationale\r\nNouveau réglage : mod_uckkassembly/requirehumanpublication\r\nNouveau réglage : mod_uckkassembly/allowminorityreports\r\nNouveau réglage : mod_uckkassembly/allowcontestation\r\nNouveau réglage : mod_uckkassembly/defaultdecisiontype\r\nNouveau réglage : mod_uckkassembly/enableminutesbydefault\r\nNouveau réglage : mod_uckkassembly/autogenerateminutesdraft\r\nNouveau réglage : mod_uckkassembly/requireminutesbeforepublication\r\nNouveau réglage : mod_uckkassembly/defaultminutesvisibility\r\nNouveau réglage : mod_uckkassembly/enablearchiveexport\r\nNouveau réglage : mod_uckkassembly/defaultarchivepolicy\r\nNouveau réglage : mod_uckkassembly/versionarchivedrecords\r\nNouveau réglage : mod_uckkassembly/enableintegrityreview\r\nNouveau réglage : mod_uckkassembly/pausepublicationonintegritycase\r\nNouveau réglage : mod_uckkassembly/restrictintegritydetails\r\nNouveau réglage : mod_uckkassembly/logproceduralactions\r\nNouveau réglage : mod_uckkassembly/allowaisummary\r\nNouveau réglage : mod_uckkassembly/labelaisummaries\r\nNouveau réglage : mod_uckkassembly/requirehumanvalidationforai\r\nNouveau réglage : mod_uckkchallenge/enabled\r\nNouveau réglage : mod_uckkchallenge/defaultvisibility\r\nNouveau réglage : mod_uckkchallenge/defaultprovenance\r\nNouveau réglage : mod_uckkchallenge/requireevidence\r\nNouveau réglage : mod_uckkchallenge/requireprovenance\r\nNouveau réglage : mod_uckkchallenge/requirehumanvalidation\r\nNouveau réglage : mod_uckkchallenge/allowpublicchallenges\r\nNouveau réglage : mod_uckkchallenge/allowcontestation\r\nNouveau réglage : mod_uckkchallenge/defaultreviewdays\r\nNouveau réglage : mod_uckkchallenge/enableintegrityreview\r\nNouveau réglage : mod_uckkchallenge/pausevalidationonintegritycase\r\nNouveau réglage : mod_uckkchallenge/archivevalidatedproofs\r\nNouveau réglage : mod_uckkchallenge/allowaiassistance\r\nNouveau réglage : mod_uckkchallenge/logaiuse\r\nNouveau réglage : mod_uckkchallenge/requireaiuncertaintylabel\r\nNouveau réglage : mod_uckkchallenge/allowaidecisionautomation\r\nNouveau réglage : tool_uckkseed/enabletool\r\nNouveau réglage : tool_uckkseed/defaultmode\r\nNouveau réglage : tool_uckkseed/allowdryrun\r\nNouveau réglage : tool_uckkseed/allowreset\r\nNouveau réglage : tool_uckkseed/requireconfirmation\r\nNouveau réglage : tool_uckkseed/allowcli\r\nNouveau réglage : tool_uckkseed/autoseedoninstall\r\nNouveau réglage : tool_uckkseed/presetpath\r\nNouveau réglage : tool_uckkseed/enabledpresets\r\nNouveau réglage : tool_uckkseed/logretentiondays\r\nNouveau réglage : tool_uckkseed/protectnonseededcontent\r\nNouveau réglage : tool_uckkseed/auditlogenabled\r\nNouveau réglage : tool_uckkintegrity/enabled\r\nNouveau réglage : tool_uckkintegrity/defaultseverity\r\nNouveau réglage : tool_uckkintegrity/appealwindow\r\nNouveau réglage : tool_uckkintegrity/restrictpublicsummaries\r\nNouveau réglage : tool_uckkintegrity/retentiondays\r\nNouveau réglage : local_uckk/enabled\r\nNouveau réglage : local_uckk/campustitle\r\nNouveau réglage : local_uckk/campusshortname\r\nNouveau réglage : local_uckk/campustagline\r\nNouveau réglage : local_uckk/campusdescription\r\nNouveau réglage : local_uckk/showinternalrecognitionnotice\r\nNouveau réglage : local_uckk/internalrecognitionnotice\r\nNouveau réglage : local_uckk/showboundarynotice\r\nNouveau réglage : local_uckk/boundarynotice\r\nNouveau réglage : local_uckk/enablekingklownlayer\r\nNouveau réglage : local_uckk/requirelevelnaming\r\nNouveau réglage : local_uckk/enforceinstitutionalclarity\r\nNouveau réglage : local_uckk/enableprogramregistry\r\nNouveau réglage : local_uckk/enablepathways\r\nNouveau réglage : local_uckk/enableplayerprofiles\r\nNouveau réglage : local_uckk/autocreateplayerprofile\r\nNouveau réglage : local_uckk/defaultpathwayvisibility\r\nNouveau réglage : local_uckk/allowpublicpathways\r\nNouveau réglage : local_uckk/enablesymbolicroles\r\nNouveau réglage : local_uckk/separatesymbolicandtechnicalroles\r\nNouveau réglage : local_uckk/showjoueurlucide\r\nNouveau réglage : local_uckk/showbatisseur\r\nNouveau réglage : local_uckk/showcartographe\r\nNouveau réglage : local_uckk/requireprovenance\r\nNouveau réglage : local_uckk/requirehumanvalidation\r\nNouveau réglage : local_uckk/defaultvisibility\r\nNouveau réglage : local_uckk/defaultvalidationstate\r\nNouveau réglage : local_uckk/allowpublicevidence\r\nNouveau réglage : local_uckk/enableintegrityguardrails\r\nNouveau réglage : local_uckk/requirecontestability\r\nNouveau réglage : local_uckk/showintegritynotices\r\nNouveau réglage : local_uckk/defaultintegrityvisibility\r\nNouveau réglage : local_uckk/preventsilentdeletion\r\nNouveau réglage : local_uckk/enablememorylayer\r\nNouveau réglage : local_uckk/enablekristals\r\nNouveau réglage : local_uckk/requirearchiveprovenance\r\nNouveau réglage : local_uckk/defaultarchivevisibility\r\nNouveau réglage : local_uckk/allowpublicarchives\r\nNouveau réglage : local_uckk/enablenavigationregistry\r\nNouveau réglage : local_uckk/enabledashboardintegration\r\nNouveau réglage : local_uckk/showdashboardpathwaycard\r\nNouveau réglage : local_uckk/showdashboardchallengecard\r\nNouveau réglage : local_uckk/showdashboardassemblycard\r\nNouveau réglage : local_uckk/showdashboardarchivecard\r\nNouveau réglage : local_uckk/showdashboardintegritycard\r\nNouveau réglage : local_uckk/enableaigovernance\r\nNouveau réglage : local_uckk/ainonsovereign\r\nNouveau réglage : local_uckk/requireaihumandecision\r\nNouveau réglage : local_uckk/logaiprovenance\r\nNouveau réglage : local_uckk/showaiwarning\r\nNouveau réglage : local_uckk/aiwarning\r\nNouveau réglage : local_uckk/integratechallenge\r\nNouveau réglage : local_uckk/integrateassembly\r\nNouveau réglage : local_uckk/integratearchive\r\nNouveau réglage : local_uckk/integrateintegrity\r\nNouveau réglage : local_uckk/integratereports\r\nNouveau réglage : local_uckk/integrateai\r\nNouveau réglage : local_uckk/canonurl\r\nNouveau réglage : local_uckk/koadigitalecosystemurl\r\nNouveau réglage : local_uckk/publicarchiveurl\r\nNouveau réglage : local_uckk/debugmode\r\nNouveau réglage : local_uckk/showdiagnostics\r\nNouveau réglage : local_uckk/cachettl\r\nNouveau réglage : local_uckk/defaultpagesize\r\nNouveau réglage : report_uckk/allowjsonexport\r\nNouveau réglage : report_uckk/showemptyreports\r\nNouveau réglage : report_uckk/defaultlimit\r\nNouveau réglage : theme_uckk/brandname\r\nNouveau réglage : theme_uckk/shortbrandname\r\nNouveau réglage : theme_uckk/internationalbrandname\r\nNouveau réglage : theme_uckk/tagline\r\nNouveau réglage : theme_uckk/institutionalstatement\r\nNouveau réglage : theme_uckk/canonicalboundary\r\nNouveau réglage : theme_uckk/logo\r\nNouveau réglage : theme_uckk/logocompact\r\nNouveau réglage : theme_uckk/frontpagebackground\r\nNouveau réglage : theme_uckk/loginbackground\r\nNouveau réglage : theme_uckk/loginbackgroundday\r\nNouveau réglage : theme_uckk/loginbackgroundbetween\r\nNouveau réglage : theme_uckk/loginbackgroundnight\r\nNouveau réglage : theme_uckk/favicon\r\nNouveau réglage : theme_uckk/brandprimary\r\nNouveau réglage : theme_uckk/brandsecondary\r\nNouveau réglage : theme_uckk/brandaccent\r\nNouveau réglage : theme_uckk/surfacebackground\r\nNouveau réglage : theme_uckk/surfacetext\r\nNouveau réglage : theme_uckk/integritycolour\r\nNouveau réglage : theme_uckk/archivecolour\r\nNouveau réglage : theme_uckk/assemblycolour\r\nNouveau réglage : theme_uckk/challengecolour\r\nNouveau réglage : theme_uckk/showfrontpagehero\r\nNouveau réglage : theme_uckk/frontpageherotitle\r\nNouveau réglage : theme_uckk/frontpageherosubtitle\r\nNouveau réglage : theme_uckk/frontpageprimarybuttontext\r\nNouveau réglage : theme_uckk/frontpageprimarybuttonurl\r\nNouveau réglage : theme_uckk/frontpagesecondarybuttontext\r\nNouveau réglage : theme_uckk/frontpagesecondarybuttonurl\r\nNouveau réglage : theme_uckk/showuckknavigation\r\nNouveau réglage : theme_uckk/quicklinks\r\nNouveau réglage : theme_uckk/showcanonicalboundary\r\nNouveau réglage : theme_uckk/showdashboardcards\r\nNouveau réglage : theme_uckk/showchallengecards\r\nNouveau réglage : theme_uckk/showassemblycards\r\nNouveau réglage : theme_uckk/showarchivecards\r\nNouveau réglage : theme_uckk/showintegritynotices\r\nNouveau réglage : theme_uckk/showailabels\r\nNouveau réglage : theme_uckk/showpublictheatrenotice\r\nNouveau réglage : theme_uckk/publictheatrenotice\r\nNouveau réglage : theme_uckk/ethicalmaxim\r\nNouveau réglage : theme_uckk/methodologicalmaxim\r\nNouveau réglage : theme_uckk/showfooterboundary\r\nNouveau réglage : theme_uckk/footertext\r\nNouveau réglage : theme_uckk/rawscsspre\r\nNouveau réglage : theme_uckk/rawscss\r\nMise à jour en ligne de commande de la version 5.2.3+ (Build: 20260916) (2026042003.01) à la version 5.2.3+ (Build: 20260916) (2026042003.01) terminée avec succès.\n",
+              "stderr": "",
+              "filePath": "php",
+              "arguments": [
+                "C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\upgrade.php",
+                "--non-interactive"
+              ],
+              "workingDir": "C:\\mycode\\UCKK\\moodle\\moodle",
+              "timeoutSeconds": 600,
+              "commandLine": "php C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\upgrade.php --non-interactive",
+              "startedAt": "2026-09-24 21:15:13.173",
+              "finishedAt": "2026-09-24 21:16:35.041",
+              "durationSeconds": 81.868
+            }
+          },
+          "steps": [
+            {
+              "name": "Résoudre racine CLI Moodle",
+              "status": "Réussi",
+              "summary": "Script upgrade Moodle trouvé.",
+              "detail": "Racine code Moodle : C:\\mycode\\UCKK\\moodle\\moodle\r\nWebroot Moodle : C:\\mycode\\UCKK\\moodle\\moodle\\public\r\nScript demandé : admin/cli/upgrade.php\r\nRacine CLI retenue : C:\\mycode\\UCKK\\moodle\\moodle\r\nScript retenu : C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\upgrade.php\r\nversion.php retenu : C:\\mycode\\UCKK\\moodle\\moodle\\public\\version.php\r\nVersion Moodle : 2026042003.01\r\nRelease Moodle : 5.2.3+ (Build: 20260916)\r\nMaturité Moodle : MATURITY_STABLE\r\n--allow-unstable requis : False\r\nMéthode de lecture version.php : line-assignment\r\n\r\nCandidats testés :\r\n- C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\upgrade.php => trouvé\r\n- C:\\mycode\\UCKK\\moodle\\moodle\\public\\admin\\cli\\upgrade.php => absent",
+              "data": {
+                "success": true,
+                "scriptRelativePath": "admin/cli/upgrade.php",
+                "cliRoot": "C:\\mycode\\UCKK\\moodle\\moodle",
+                "scriptPath": "C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\upgrade.php",
+                "localMoodleRoot": "C:\\mycode\\UCKK\\moodle\\moodle",
+                "localMoodleRuntime": "C:\\mycode\\UCKK\\moodle\\moodle\\public",
+                "candidateRoots": [
+                  "C:\\mycode\\UCKK\\moodle\\moodle",
+                  "C:\\mycode\\UCKK\\moodle\\moodle\\public"
+                ],
+                "probes": [
+                  {
+                    "root": "C:\\mycode\\UCKK\\moodle\\moodle",
+                    "script": "C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\upgrade.php",
+                    "scriptExists": true,
+                    "rootExists": true
+                  },
+                  {
+                    "root": "C:\\mycode\\UCKK\\moodle\\moodle\\public",
+                    "script": "C:\\mycode\\UCKK\\moodle\\moodle\\public\\admin\\cli\\upgrade.php",
+                    "scriptExists": false,
+                    "rootExists": true
+                  }
+                ],
+                "configProbes": [
+                  {
+                    "path": "C:\\mycode\\UCKK\\moodle\\moodle\\config.php",
+                    "exists": true
+                  },
+                  {
+                    "path": "C:\\mycode\\UCKK\\moodle\\moodle\\public\\config.php",
+                    "exists": true
+                  }
+                ]
+              },
+              "timestamp": "2026-09-24 21:15:13"
+            },
+            {
+              "name": "Exécuter upgrade Moodle local",
+              "status": "Réussi",
+              "summary": "Upgrade Moodle local terminé.",
+              "detail": "Commande : php C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\upgrade.php --non-interactive\r\nDossier courant : C:\\mycode\\UCKK\\moodle\\moodle\r\nCode de sortie : 0\r\nTimeout : False\r\nDurée : 81.868 s\r\n\r\nSTDOUT :\r\n-->aiprovider_uckk\n++ Succès (0,72 secondes) ++\n-->mod_uckkarchive\n++ Succès (2,76 secondes) ++\n-->mod_uckkassembly\n++ Succès (1,19 secondes) ++\n-->mod_uckkchallenge\n++ Succès (0,87 secondes) ++\n-->block_uckk_dashboard\n++ Succès (0,35 secondes) ++\n-->format_uckk\n++ Succès (0,48 secondes) ++\n-->report_uckk\n++ Succès (0,24 secondes) ++\n-->tool_uckkintegrity\n++ Succès (0,50 secondes) ++\n-->tool_uckkseed\n++ Succès (0,37 secondes) ++\n-->theme_uckk\n++ Succès (0,17 secondes) ++\n-->theme_ucmath\n++ Succès (0,17 secondes) ++\n-->local_uckk\n++ Succès (1,05 secondes) ++\n== Réglage des nouvelles valeurs par défaut ==\r\nNouveau réglage : block_uckk_dashboard/defaultviewmode\r\nNouveau réglage : block_uckk_dashboard/showpathway\r\nNouveau réglage : block_uckk_dashboard/showtronccommun\r\nNouveau réglage : block_uckk_dashboard/showcompetencies\r\nNouveau réglage : block_uckk_dashboard/showbadges\r\nNouveau réglage : block_uckk_dashboard/showchallenges\r\nNouveau réglage : block_uckk_dashboard/showassemblies\r\nNouveau réglage : block_uckk_dashboard/showarchive\r\nNouveau réglage : block_uckk_dashboard/showintegrity\r\nNouveau réglage : block_uckk_dashboard/showdeadlines\r\nNouveau réglage : block_uckk_dashboard/showportfolio\r\nNouveau réglage : block_uckk_dashboard/refreshinterval\r\nNouveau réglage : block_uckk_dashboard/maxsummaryitems\r\nNouveau réglage : block_uckk_dashboard/showrestrictedindicators\r\nNouveau réglage : block_uckk_dashboard/allowmanualrefresh\r\nNouveau réglage : format_uckk/showcourseidentity\r\nNouveau réglage : format_uckk/showcanonicalnotice\r\nNouveau réglage : format_uckk/showinternalrecognitionnotice\r\nNouveau réglage : format_uckk/showkoacycle\r\nNouveau réglage : format_uckk/defaultcoursestyle\r\nNouveau réglage : format_uckk/lockstandardsections\r\nNouveau réglage : format_uckk/autocreatestandardsections\r\nNouveau réglage : format_uckk/defaultsectionset\r\nNouveau réglage : format_uckk/standardsectionkeys\r\nNouveau réglage : format_uckk/showsectionicons\r\nNouveau réglage : format_uckk/showcompletionoverview\r\nNouveau réglage : format_uckk/showproofindicators\r\nNouveau réglage : format_uckk/showarchiveindicators\r\nNouveau réglage : format_uckk/showintegritymarkers\r\nNouveau réglage : format_uckk/showassemblymarkers\r\nNouveau réglage : format_uckk/showchallengemarkers\r\nNouveau réglage : format_uckk/showuckknavigation\r\nNouveau réglage : format_uckk/showcourseindexmetadata\r\nNouveau réglage : format_uckk/defaultsectiondisplay\r\nNouveau réglage : format_uckk/maxsectiontitlelength\r\nNouveau réglage : format_uckk/emphasizeproofsection\r\nNouveau réglage : format_uckk/emphasizearchivesection\r\nNouveau réglage : format_uckk/showprovenancenotice\r\nNouveau réglage : format_uckk/showintegritynotice\r\nNouveau réglage : format_uckk/showainonsovereignnotice\r\nNouveau réglage : format_uckk/linktochallengeactivity\r\nNouveau réglage : format_uckk/linktoassemblyactivity\r\nNouveau réglage : format_uckk/linktoarchiveactivity\r\nNouveau réglage : format_uckk/linktointegritytool\r\nNouveau réglage : format_uckk/showdebugmarkers\r\nNouveau réglage : format_uckk/logformatdiagnostics\r\nNouveau réglage : mod_uckkassembly/defaultenabled\r\nNouveau réglage : mod_uckkassembly/defaultassemblytype\r\nNouveau réglage : mod_uckkassembly/defaultvisibility\r\nNouveau réglage : mod_uckkassembly/allowmotionsbydefault\r\nNouveau réglage : mod_uckkassembly/allowamendmentsbydefault\r\nNouveau réglage : mod_uckkassembly/allowobjectionsbydefault\r\nNouveau réglage : mod_uckkassembly/maxamendmentspermotion\r\nNouveau réglage : mod_uckkassembly/enablevotesbydefault\r\nNouveau réglage : mod_uckkassembly/defaultvotemethod\r\nNouveau réglage : mod_uckkassembly/defaultquorumpercent\r\nNouveau réglage : mod_uckkassembly/defaultapprovalthreshold\r\nNouveau réglage : mod_uckkassembly/allowvotechange\r\nNouveau réglage : mod_uckkassembly/requirevoterationale\r\nNouveau réglage : mod_uckkassembly/requirehumanpublication\r\nNouveau réglage : mod_uckkassembly/allowminorityreports\r\nNouveau réglage : mod_uckkassembly/allowcontestation\r\nNouveau réglage : mod_uckkassembly/defaultdecisiontype\r\nNouveau réglage : mod_uckkassembly/enableminutesbydefault\r\nNouveau réglage : mod_uckkassembly/autogenerateminutesdraft\r\nNouveau réglage : mod_uckkassembly/requireminutesbeforepublication\r\nNouveau réglage : mod_uckkassembly/defaultminutesvisibility\r\nNouveau réglage : mod_uckkassembly/enablearchiveexport\r\nNouveau réglage : mod_uckkassembly/defaultarchivepolicy\r\nNouveau réglage : mod_uckkassembly/versionarchivedrecords\r\nNouveau réglage : mod_uckkassembly/enableintegrityreview\r\nNouveau réglage : mod_uckkassembly/pausepublicationonintegritycase\r\nNouveau réglage : mod_uckkassembly/restrictintegritydetails\r\nNouveau réglage : mod_uckkassembly/logproceduralactions\r\nNouveau réglage : mod_uckkassembly/allowaisummary\r\nNouveau réglage : mod_uckkassembly/labelaisummaries\r\nNouveau réglage : mod_uckkassembly/requirehumanvalidationforai\r\nNouveau réglage : mod_uckkchallenge/enabled\r\nNouveau réglage : mod_uckkchallenge/defaultvisibility\r\nNouveau réglage : mod_uckkchallenge/defaultprovenance\r\nNouveau réglage : mod_uckkchallenge/requireevidence\r\nNouveau réglage : mod_uckkchallenge/requireprovenance\r\nNouveau réglage : mod_uckkchallenge/requirehumanvalidation\r\nNouveau réglage : mod_uckkchallenge/allowpublicchallenges\r\nNouveau réglage : mod_uckkchallenge/allowcontestation\r\nNouveau réglage : mod_uckkchallenge/defaultreviewdays\r\nNouveau réglage : mod_uckkchallenge/enableintegrityreview\r\nNouveau réglage : mod_uckkchallenge/pausevalidationonintegritycase\r\nNouveau réglage : mod_uckkchallenge/archivevalidatedproofs\r\nNouveau réglage : mod_uckkchallenge/allowaiassistance\r\nNouveau réglage : mod_uckkchallenge/logaiuse\r\nNouveau réglage : mod_uckkchallenge/requireaiuncertaintylabel\r\nNouveau réglage : mod_uckkchallenge/allowaidecisionautomation\r\nNouveau réglage : tool_uckkseed/enabletool\r\nNouveau réglage : tool_uckkseed/defaultmode\r\nNouveau réglage : tool_uckkseed/allowdryrun\r\nNouveau réglage : tool_uckkseed/allowreset\r\nNouveau réglage : tool_uckkseed/requireconfirmation\r\nNouveau réglage : tool_uckkseed/allowcli\r\nNouveau réglage : tool_uckkseed/autoseedoninstall\r\nNouveau réglage : tool_uckkseed/presetpath\r\nNouveau réglage : tool_uckkseed/enabledpresets\r\nNouveau réglage : tool_uckkseed/logretentiondays\r\nNouveau réglage : tool_uckkseed/protectnonseededcontent\r\nNouveau réglage : tool_uckkseed/auditlogenabled\r\nNouveau réglage : tool_uckkintegrity/enabled\r\nNouveau réglage : tool_uckkintegrity/defaultseverity\r\nNouveau réglage : tool_uckkintegrity/appealwindow\r\nNouveau réglage : tool_uckkintegrity/restrictpublicsummaries\r\nNouveau réglage : tool_uckkintegrity/retentiondays\r\nNouveau réglage : local_uckk/enabled\r\nNouveau réglage : local_uckk/campustitle\r\nNouveau réglage : local_uckk/campusshortname\r\nNouveau réglage : local_uckk/campustagline\r\nNouveau réglage : local_uckk/campusdescription\r\nNouveau réglage : local_uckk/showinternalrecognitionnotice\r\nNouveau réglage : local_uckk/internalrecognitionnotice\r\nNouveau réglage : local_uckk/showboundarynotice\r\nNouveau réglage : local_uckk/boundarynotice\r\nNouveau réglage : local_uckk/enablekingklownlayer\r\nNouveau réglage : local_uckk/requirelevelnaming\r\nNouveau réglage : local_uckk/enforceinstitutionalclarity\r\nNouveau réglage : local_uckk/enableprogramregistry\r\nNouveau réglage : local_uckk/enablepathways\r\nNouveau réglage : local_uckk/enableplayerprofiles\r\nNouveau réglage : local_uckk/autocreateplayerprofile\r\nNouveau réglage : local_uckk/defaultpathwayvisibility\r\nNouveau réglage : local_uckk/allowpublicpathways\r\nNouveau réglage : local_uckk/enablesymbolicroles\r\nNouveau réglage : local_uckk/separatesymbolicandtechnicalroles\r\nNouveau réglage : local_uckk/showjoueurlucide\r\nNouveau réglage : local_uckk/showbatisseur\r\nNouveau réglage : local_uckk/showcartographe\r\nNouveau réglage : local_uckk/requireprovenance\r\nNouveau réglage : local_uckk/requirehumanvalidation\r\nNouveau réglage : local_uckk/defaultvisibility\r\nNouveau réglage : local_uckk/defaultvalidationstate\r\nNouveau réglage : local_uckk/allowpublicevidence\r\nNouveau réglage : local_uckk/enableintegrityguardrails\r\nNouveau réglage : local_uckk/requirecontestability\r\nNouveau réglage : local_uckk/showintegritynotices\r\nNouveau réglage : local_uckk/defaultintegrityvisibility\r\nNouveau réglage : local_uckk/preventsilentdeletion\r\nNouveau réglage : local_uckk/enablememorylayer\r\nNouveau réglage : local_uckk/enablekristals\r\nNouveau réglage : local_uckk/requirearchiveprovenance\r\nNouveau réglage : local_uckk/defaultarchivevisibility\r\nNouveau réglage : local_uckk/allowpublicarchives\r\nNouveau réglage : local_uckk/enablenavigationregistry\r\nNouveau réglage : local_uckk/enabledashboardintegration\r\nNouveau réglage : local_uckk/showdashboardpathwaycard\r\nNouveau réglage : local_uckk/showdashboardchallengecard\r\nNouveau réglage : local_uckk/showdashboardassemblycard\r\nNouveau réglage : local_uckk/showdashboardarchivecard\r\nNouveau réglage : local_uckk/showdashboardintegritycard\r\nNouveau réglage : local_uckk/enableaigovernance\r\nNouveau réglage : local_uckk/ainonsovereign\r\nNouveau réglage : local_uckk/requireaihumandecision\r\nNouveau réglage : local_uckk/logaiprovenance\r\nNouveau réglage : local_uckk/showaiwarning\r\nNouveau réglage : local_uckk/aiwarning\r\nNouveau réglage : local_uckk/integratechallenge\r\nNouveau réglage : local_uckk/integrateassembly\r\nNouveau réglage : local_uckk/integratearchive\r\nNouveau réglage : local_uckk/integrateintegrity\r\nNouveau réglage : local_uckk/integratereports\r\nNouveau réglage : local_uckk/integrateai\r\nNouveau réglage : local_uckk/canonurl\r\nNouveau réglage : local_uckk/koadigitalecosystemurl\r\nNouveau réglage : local_uckk/publicarchiveurl\r\nNouveau réglage : local_uckk/debugmode\r\nNouveau réglage : local_uckk/showdiagnostics\r\nNouveau réglage : local_uckk/cachettl\r\nNouveau réglage : local_uckk/defaultpagesize\r\nNouveau réglage : report_uckk/allowjsonexport\r\nNouveau réglage : report_uckk/showemptyreports\r\nNouveau réglage : report_uckk/defaultlimit\r\nNouveau réglage : theme_uckk/brandname\r\nNouveau réglage : theme_uckk/shortbrandname\r\nNouveau réglage : theme_uckk/internationalbrandname\r\nNouveau réglage : theme_uckk/tagline\r\nNouveau réglage : theme_uckk/institutionalstatement\r\nNouveau réglage : theme_uckk/canonicalboundary\r\nNouveau réglage : theme_uckk/logo\r\nNouveau réglage : theme_uckk/logocompact\r\nNouveau réglage : theme_uckk/frontpagebackground\r\nNouveau réglage : theme_uckk/loginbackground\r\nNouveau réglage : theme_uckk/loginbackgroundday\r\nNouveau réglage : theme_uckk/loginbackgroundbetween\r\nNouveau réglage : theme_uckk/loginbackgroundnight\r\nNouveau réglage : theme_uckk/favicon\r\nNouveau réglage : theme_uckk/brandprimary\r\nNouveau réglage : theme_uckk/brandsecondary\r\nNouveau réglage : theme_uckk/brandaccent\r\nNouveau réglage : theme_uckk/surfacebackground\r\nNouveau réglage : theme_uckk/surfacetext\r\nNouveau réglage : theme_uckk/integritycolour\r\nNouveau réglage : theme_uckk/archivecolour\r\nNouveau réglage : theme_uckk/assemblycolour\r\nNouveau réglage : theme_uckk/challengecolour\r\nNouveau réglage : theme_uckk/showfrontpagehero\r\nNouveau réglage : theme_uckk/frontpageherotitle\r\nNouveau réglage : theme_uckk/frontpageherosubtitle\r\nNouveau réglage : theme_uckk/frontpageprimarybuttontext\r\nNouveau réglage : theme_uckk/frontpageprimarybuttonurl\r\nNouveau réglage : theme_uckk/frontpagesecondarybuttontext\r\nNouveau réglage : theme_uckk/frontpagesecondarybuttonurl\r\nNouveau réglage : theme_uckk/showuckknavigation\r\nNouveau réglage : theme_uckk/quicklinks\r\nNouveau réglage : theme_uckk/showcanonicalboundary\r\nNouveau réglage : theme_uckk/showdashboardcards\r\nNouveau réglage : theme_uckk/showchallengecards\r\nNouveau réglage : theme_uckk/showassemblycards\r\nNouveau réglage : theme_uckk/showarchivecards\r\nNouveau réglage : theme_uckk/showintegritynotices\r\nNouveau réglage : theme_uckk/showailabels\r\nNouveau réglage : theme_uckk/showpublictheatrenotice\r\nNouveau réglage : theme_uckk/publictheatrenotice\r\nNouveau réglage : theme_uckk/ethicalmaxim\r\nNouveau réglage : theme_uckk/methodologicalmaxim\r\nNouveau réglage : theme_uckk/showfooterboundary\r\nNouveau réglage : theme_uckk/footertext\r\nNouveau réglage : theme_uckk/rawscsspre\r\nNouveau réglage : theme_uckk/rawscss\r\nMise à jour en ligne de commande de la version 5.2.3+ (Build: 20260916) (2026042003.01) à la version 5.2.3+ (Build: 20260916) (2026042003.01) terminée avec succès.\r\n\r\nSTDERR :\r\n(vide)",
+              "data": {
+                "success": true,
+                "timedOut": false,
+                "exitCode": 0,
+                "stdout": "-->aiprovider_uckk\n++ Succès (0,72 secondes) ++\n-->mod_uckkarchive\n++ Succès (2,76 secondes) ++\n-->mod_uckkassembly\n++ Succès (1,19 secondes) ++\n-->mod_uckkchallenge\n++ Succès (0,87 secondes) ++\n-->block_uckk_dashboard\n++ Succès (0,35 secondes) ++\n-->format_uckk\n++ Succès (0,48 secondes) ++\n-->report_uckk\n++ Succès (0,24 secondes) ++\n-->tool_uckkintegrity\n++ Succès (0,50 secondes) ++\n-->tool_uckkseed\n++ Succès (0,37 secondes) ++\n-->theme_uckk\n++ Succès (0,17 secondes) ++\n-->theme_ucmath\n++ Succès (0,17 secondes) ++\n-->local_uckk\n++ Succès (1,05 secondes) ++\n== Réglage des nouvelles valeurs par défaut ==\r\nNouveau réglage : block_uckk_dashboard/defaultviewmode\r\nNouveau réglage : block_uckk_dashboard/showpathway\r\nNouveau réglage : block_uckk_dashboard/showtronccommun\r\nNouveau réglage : block_uckk_dashboard/showcompetencies\r\nNouveau réglage : block_uckk_dashboard/showbadges\r\nNouveau réglage : block_uckk_dashboard/showchallenges\r\nNouveau réglage : block_uckk_dashboard/showassemblies\r\nNouveau réglage : block_uckk_dashboard/showarchive\r\nNouveau réglage : block_uckk_dashboard/showintegrity\r\nNouveau réglage : block_uckk_dashboard/showdeadlines\r\nNouveau réglage : block_uckk_dashboard/showportfolio\r\nNouveau réglage : block_uckk_dashboard/refreshinterval\r\nNouveau réglage : block_uckk_dashboard/maxsummaryitems\r\nNouveau réglage : block_uckk_dashboard/showrestrictedindicators\r\nNouveau réglage : block_uckk_dashboard/allowmanualrefresh\r\nNouveau réglage : format_uckk/showcourseidentity\r\nNouveau réglage : format_uckk/showcanonicalnotice\r\nNouveau réglage : format_uckk/showinternalrecognitionnotice\r\nNouveau réglage : format_uckk/showkoacycle\r\nNouveau réglage : format_uckk/defaultcoursestyle\r\nNouveau réglage : format_uckk/lockstandardsections\r\nNouveau réglage : format_uckk/autocreatestandardsections\r\nNouveau réglage : format_uckk/defaultsectionset\r\nNouveau réglage : format_uckk/standardsectionkeys\r\nNouveau réglage : format_uckk/showsectionicons\r\nNouveau réglage : format_uckk/showcompletionoverview\r\nNouveau réglage : format_uckk/showproofindicators\r\nNouveau réglage : format_uckk/showarchiveindicators\r\nNouveau réglage : format_uckk/showintegritymarkers\r\nNouveau réglage : format_uckk/showassemblymarkers\r\nNouveau réglage : format_uckk/showchallengemarkers\r\nNouveau réglage : format_uckk/showuckknavigation\r\nNouveau réglage : format_uckk/showcourseindexmetadata\r\nNouveau réglage : format_uckk/defaultsectiondisplay\r\nNouveau réglage : format_uckk/maxsectiontitlelength\r\nNouveau réglage : format_uckk/emphasizeproofsection\r\nNouveau réglage : format_uckk/emphasizearchivesection\r\nNouveau réglage : format_uckk/showprovenancenotice\r\nNouveau réglage : format_uckk/showintegritynotice\r\nNouveau réglage : format_uckk/showainonsovereignnotice\r\nNouveau réglage : format_uckk/linktochallengeactivity\r\nNouveau réglage : format_uckk/linktoassemblyactivity\r\nNouveau réglage : format_uckk/linktoarchiveactivity\r\nNouveau réglage : format_uckk/linktointegritytool\r\nNouveau réglage : format_uckk/showdebugmarkers\r\nNouveau réglage : format_uckk/logformatdiagnostics\r\nNouveau réglage : mod_uckkassembly/defaultenabled\r\nNouveau réglage : mod_uckkassembly/defaultassemblytype\r\nNouveau réglage : mod_uckkassembly/defaultvisibility\r\nNouveau réglage : mod_uckkassembly/allowmotionsbydefault\r\nNouveau réglage : mod_uckkassembly/allowamendmentsbydefault\r\nNouveau réglage : mod_uckkassembly/allowobjectionsbydefault\r\nNouveau réglage : mod_uckkassembly/maxamendmentspermotion\r\nNouveau réglage : mod_uckkassembly/enablevotesbydefault\r\nNouveau réglage : mod_uckkassembly/defaultvotemethod\r\nNouveau réglage : mod_uckkassembly/defaultquorumpercent\r\nNouveau réglage : mod_uckkassembly/defaultapprovalthreshold\r\nNouveau réglage : mod_uckkassembly/allowvotechange\r\nNouveau réglage : mod_uckkassembly/requirevoterationale\r\nNouveau réglage : mod_uckkassembly/requirehumanpublication\r\nNouveau réglage : mod_uckkassembly/allowminorityreports\r\nNouveau réglage : mod_uckkassembly/allowcontestation\r\nNouveau réglage : mod_uckkassembly/defaultdecisiontype\r\nNouveau réglage : mod_uckkassembly/enableminutesbydefault\r\nNouveau réglage : mod_uckkassembly/autogenerateminutesdraft\r\nNouveau réglage : mod_uckkassembly/requireminutesbeforepublication\r\nNouveau réglage : mod_uckkassembly/defaultminutesvisibility\r\nNouveau réglage : mod_uckkassembly/enablearchiveexport\r\nNouveau réglage : mod_uckkassembly/defaultarchivepolicy\r\nNouveau réglage : mod_uckkassembly/versionarchivedrecords\r\nNouveau réglage : mod_uckkassembly/enableintegrityreview\r\nNouveau réglage : mod_uckkassembly/pausepublicationonintegritycase\r\nNouveau réglage : mod_uckkassembly/restrictintegritydetails\r\nNouveau réglage : mod_uckkassembly/logproceduralactions\r\nNouveau réglage : mod_uckkassembly/allowaisummary\r\nNouveau réglage : mod_uckkassembly/labelaisummaries\r\nNouveau réglage : mod_uckkassembly/requirehumanvalidationforai\r\nNouveau réglage : mod_uckkchallenge/enabled\r\nNouveau réglage : mod_uckkchallenge/defaultvisibility\r\nNouveau réglage : mod_uckkchallenge/defaultprovenance\r\nNouveau réglage : mod_uckkchallenge/requireevidence\r\nNouveau réglage : mod_uckkchallenge/requireprovenance\r\nNouveau réglage : mod_uckkchallenge/requirehumanvalidation\r\nNouveau réglage : mod_uckkchallenge/allowpublicchallenges\r\nNouveau réglage : mod_uckkchallenge/allowcontestation\r\nNouveau réglage : mod_uckkchallenge/defaultreviewdays\r\nNouveau réglage : mod_uckkchallenge/enableintegrityreview\r\nNouveau réglage : mod_uckkchallenge/pausevalidationonintegritycase\r\nNouveau réglage : mod_uckkchallenge/archivevalidatedproofs\r\nNouveau réglage : mod_uckkchallenge/allowaiassistance\r\nNouveau réglage : mod_uckkchallenge/logaiuse\r\nNouveau réglage : mod_uckkchallenge/requireaiuncertaintylabel\r\nNouveau réglage : mod_uckkchallenge/allowaidecisionautomation\r\nNouveau réglage : tool_uckkseed/enabletool\r\nNouveau réglage : tool_uckkseed/defaultmode\r\nNouveau réglage : tool_uckkseed/allowdryrun\r\nNouveau réglage : tool_uckkseed/allowreset\r\nNouveau réglage : tool_uckkseed/requireconfirmation\r\nNouveau réglage : tool_uckkseed/allowcli\r\nNouveau réglage : tool_uckkseed/autoseedoninstall\r\nNouveau réglage : tool_uckkseed/presetpath\r\nNouveau réglage : tool_uckkseed/enabledpresets\r\nNouveau réglage : tool_uckkseed/logretentiondays\r\nNouveau réglage : tool_uckkseed/protectnonseededcontent\r\nNouveau réglage : tool_uckkseed/auditlogenabled\r\nNouveau réglage : tool_uckkintegrity/enabled\r\nNouveau réglage : tool_uckkintegrity/defaultseverity\r\nNouveau réglage : tool_uckkintegrity/appealwindow\r\nNouveau réglage : tool_uckkintegrity/restrictpublicsummaries\r\nNouveau réglage : tool_uckkintegrity/retentiondays\r\nNouveau réglage : local_uckk/enabled\r\nNouveau réglage : local_uckk/campustitle\r\nNouveau réglage : local_uckk/campusshortname\r\nNouveau réglage : local_uckk/campustagline\r\nNouveau réglage : local_uckk/campusdescription\r\nNouveau réglage : local_uckk/showinternalrecognitionnotice\r\nNouveau réglage : local_uckk/internalrecognitionnotice\r\nNouveau réglage : local_uckk/showboundarynotice\r\nNouveau réglage : local_uckk/boundarynotice\r\nNouveau réglage : local_uckk/enablekingklownlayer\r\nNouveau réglage : local_uckk/requirelevelnaming\r\nNouveau réglage : local_uckk/enforceinstitutionalclarity\r\nNouveau réglage : local_uckk/enableprogramregistry\r\nNouveau réglage : local_uckk/enablepathways\r\nNouveau réglage : local_uckk/enableplayerprofiles\r\nNouveau réglage : local_uckk/autocreateplayerprofile\r\nNouveau réglage : local_uckk/defaultpathwayvisibility\r\nNouveau réglage : local_uckk/allowpublicpathways\r\nNouveau réglage : local_uckk/enablesymbolicroles\r\nNouveau réglage : local_uckk/separatesymbolicandtechnicalroles\r\nNouveau réglage : local_uckk/showjoueurlucide\r\nNouveau réglage : local_uckk/showbatisseur\r\nNouveau réglage : local_uckk/showcartographe\r\nNouveau réglage : local_uckk/requireprovenance\r\nNouveau réglage : local_uckk/requirehumanvalidation\r\nNouveau réglage : local_uckk/defaultvisibility\r\nNouveau réglage : local_uckk/defaultvalidationstate\r\nNouveau réglage : local_uckk/allowpublicevidence\r\nNouveau réglage : local_uckk/enableintegrityguardrails\r\nNouveau réglage : local_uckk/requirecontestability\r\nNouveau réglage : local_uckk/showintegritynotices\r\nNouveau réglage : local_uckk/defaultintegrityvisibility\r\nNouveau réglage : local_uckk/preventsilentdeletion\r\nNouveau réglage : local_uckk/enablememorylayer\r\nNouveau réglage : local_uckk/enablekristals\r\nNouveau réglage : local_uckk/requirearchiveprovenance\r\nNouveau réglage : local_uckk/defaultarchivevisibility\r\nNouveau réglage : local_uckk/allowpublicarchives\r\nNouveau réglage : local_uckk/enablenavigationregistry\r\nNouveau réglage : local_uckk/enabledashboardintegration\r\nNouveau réglage : local_uckk/showdashboardpathwaycard\r\nNouveau réglage : local_uckk/showdashboardchallengecard\r\nNouveau réglage : local_uckk/showdashboardassemblycard\r\nNouveau réglage : local_uckk/showdashboardarchivecard\r\nNouveau réglage : local_uckk/showdashboardintegritycard\r\nNouveau réglage : local_uckk/enableaigovernance\r\nNouveau réglage : local_uckk/ainonsovereign\r\nNouveau réglage : local_uckk/requireaihumandecision\r\nNouveau réglage : local_uckk/logaiprovenance\r\nNouveau réglage : local_uckk/showaiwarning\r\nNouveau réglage : local_uckk/aiwarning\r\nNouveau réglage : local_uckk/integratechallenge\r\nNouveau réglage : local_uckk/integrateassembly\r\nNouveau réglage : local_uckk/integratearchive\r\nNouveau réglage : local_uckk/integrateintegrity\r\nNouveau réglage : local_uckk/integratereports\r\nNouveau réglage : local_uckk/integrateai\r\nNouveau réglage : local_uckk/canonurl\r\nNouveau réglage : local_uckk/koadigitalecosystemurl\r\nNouveau réglage : local_uckk/publicarchiveurl\r\nNouveau réglage : local_uckk/debugmode\r\nNouveau réglage : local_uckk/showdiagnostics\r\nNouveau réglage : local_uckk/cachettl\r\nNouveau réglage : local_uckk/defaultpagesize\r\nNouveau réglage : report_uckk/allowjsonexport\r\nNouveau réglage : report_uckk/showemptyreports\r\nNouveau réglage : report_uckk/defaultlimit\r\nNouveau réglage : theme_uckk/brandname\r\nNouveau réglage : theme_uckk/shortbrandname\r\nNouveau réglage : theme_uckk/internationalbrandname\r\nNouveau réglage : theme_uckk/tagline\r\nNouveau réglage : theme_uckk/institutionalstatement\r\nNouveau réglage : theme_uckk/canonicalboundary\r\nNouveau réglage : theme_uckk/logo\r\nNouveau réglage : theme_uckk/logocompact\r\nNouveau réglage : theme_uckk/frontpagebackground\r\nNouveau réglage : theme_uckk/loginbackground\r\nNouveau réglage : theme_uckk/loginbackgroundday\r\nNouveau réglage : theme_uckk/loginbackgroundbetween\r\nNouveau réglage : theme_uckk/loginbackgroundnight\r\nNouveau réglage : theme_uckk/favicon\r\nNouveau réglage : theme_uckk/brandprimary\r\nNouveau réglage : theme_uckk/brandsecondary\r\nNouveau réglage : theme_uckk/brandaccent\r\nNouveau réglage : theme_uckk/surfacebackground\r\nNouveau réglage : theme_uckk/surfacetext\r\nNouveau réglage : theme_uckk/integritycolour\r\nNouveau réglage : theme_uckk/archivecolour\r\nNouveau réglage : theme_uckk/assemblycolour\r\nNouveau réglage : theme_uckk/challengecolour\r\nNouveau réglage : theme_uckk/showfrontpagehero\r\nNouveau réglage : theme_uckk/frontpageherotitle\r\nNouveau réglage : theme_uckk/frontpageherosubtitle\r\nNouveau réglage : theme_uckk/frontpageprimarybuttontext\r\nNouveau réglage : theme_uckk/frontpageprimarybuttonurl\r\nNouveau réglage : theme_uckk/frontpagesecondarybuttontext\r\nNouveau réglage : theme_uckk/frontpagesecondarybuttonurl\r\nNouveau réglage : theme_uckk/showuckknavigation\r\nNouveau réglage : theme_uckk/quicklinks\r\nNouveau réglage : theme_uckk/showcanonicalboundary\r\nNouveau réglage : theme_uckk/showdashboardcards\r\nNouveau réglage : theme_uckk/showchallengecards\r\nNouveau réglage : theme_uckk/showassemblycards\r\nNouveau réglage : theme_uckk/showarchivecards\r\nNouveau réglage : theme_uckk/showintegritynotices\r\nNouveau réglage : theme_uckk/showailabels\r\nNouveau réglage : theme_uckk/showpublictheatrenotice\r\nNouveau réglage : theme_uckk/publictheatrenotice\r\nNouveau réglage : theme_uckk/ethicalmaxim\r\nNouveau réglage : theme_uckk/methodologicalmaxim\r\nNouveau réglage : theme_uckk/showfooterboundary\r\nNouveau réglage : theme_uckk/footertext\r\nNouveau réglage : theme_uckk/rawscsspre\r\nNouveau réglage : theme_uckk/rawscss\r\nMise à jour en ligne de commande de la version 5.2.3+ (Build: 20260916) (2026042003.01) à la version 5.2.3+ (Build: 20260916) (2026042003.01) terminée avec succès.\n",
+                "stderr": "",
+                "filePath": "php",
+                "arguments": [
+                  "C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\upgrade.php",
+                  "--non-interactive"
+                ],
+                "workingDir": "C:\\mycode\\UCKK\\moodle\\moodle",
+                "timeoutSeconds": 600,
+                "commandLine": "php C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\upgrade.php --non-interactive",
+                "startedAt": "2026-09-24 21:15:13.173",
+                "finishedAt": "2026-09-24 21:16:35.041",
+                "durationSeconds": 81.868
+              },
+              "timestamp": "2026-09-24 21:16:35"
+            }
+          ],
+          "startedAt": "2026-09-24 21:15:13",
+          "finishedAt": "2026-09-24 21:16:35",
+          "durationSeconds": 82.0
+        }
+      },
+      {
+        "id": "local.purge_caches",
+        "label": "Purger les caches locaux",
+        "status": "Réussi",
+        "summary": "Réussi — les caches Moodle locaux ont été purgés. Racine CLI utilisée : C:\\mycode\\UCKK\\moodle\\moodle",
+        "result": {
+          "success": true,
+          "status": "Réussi",
+          "action": "Purger les caches locaux",
+          "domain": "local",
+          "target": "Moodle local",
+          "dangerLevel": 2,
+          "mode": "application",
+          "summary": "Réussi — les caches Moodle locaux ont été purgés. Racine CLI utilisée : C:\\mycode\\UCKK\\moodle\\moodle",
+          "warnings": [],
+          "errors": [],
+          "nextStep": "Ouvrir Moodle local et vérifier les pages concernées.",
+          "reportPath": "",
+          "logPath": "",
+          "data": {
+            "phpBinary": "php",
+            "cliContext": {
+              "success": true,
+              "scriptRelativePath": "admin/cli/purge_caches.php",
+              "cliRoot": "C:\\mycode\\UCKK\\moodle\\moodle",
+              "scriptPath": "C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\purge_caches.php",
+              "localMoodleRoot": "C:\\mycode\\UCKK\\moodle\\moodle",
+              "localMoodleRuntime": "C:\\mycode\\UCKK\\moodle\\moodle\\public",
+              "candidateRoots": [
+                "C:\\mycode\\UCKK\\moodle\\moodle",
+                "C:\\mycode\\UCKK\\moodle\\moodle\\public"
+              ],
+              "probes": [
+                {
+                  "root": "C:\\mycode\\UCKK\\moodle\\moodle",
+                  "script": "C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\purge_caches.php",
+                  "scriptExists": true,
+                  "rootExists": true
+                },
+                {
+                  "root": "C:\\mycode\\UCKK\\moodle\\moodle\\public",
+                  "script": "C:\\mycode\\UCKK\\moodle\\moodle\\public\\admin\\cli\\purge_caches.php",
+                  "scriptExists": false,
+                  "rootExists": true
+                }
+              ],
+              "configProbes": [
+                {
+                  "path": "C:\\mycode\\UCKK\\moodle\\moodle\\config.php",
+                  "exists": true
+                },
+                {
+                  "path": "C:\\mycode\\UCKK\\moodle\\moodle\\public\\config.php",
+                  "exists": true
+                }
+              ]
+            },
+            "process": {
+              "success": true,
+              "timedOut": false,
+              "exitCode": 0,
+              "stdout": "",
+              "stderr": "",
+              "filePath": "php",
+              "arguments": [
+                "C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\purge_caches.php"
+              ],
+              "workingDir": "C:\\mycode\\UCKK\\moodle\\moodle",
+              "timeoutSeconds": 180,
+              "commandLine": "php C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\purge_caches.php",
+              "startedAt": "2026-09-24 21:16:35.087",
+              "finishedAt": "2026-09-24 21:16:39.768",
+              "durationSeconds": 4.68
+            }
+          },
+          "steps": [
+            {
+              "name": "Résoudre racine CLI Moodle",
+              "status": "Réussi",
+              "summary": "Script de purge Moodle trouvé.",
+              "detail": "Racine code Moodle : C:\\mycode\\UCKK\\moodle\\moodle\r\nWebroot Moodle : C:\\mycode\\UCKK\\moodle\\moodle\\public\r\nScript demandé : admin/cli/purge_caches.php\r\nRacine CLI retenue : C:\\mycode\\UCKK\\moodle\\moodle\r\nScript retenu : C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\purge_caches.php\r\n\r\nCandidats testés :\r\n- C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\purge_caches.php => trouvé\r\n- C:\\mycode\\UCKK\\moodle\\moodle\\public\\admin\\cli\\purge_caches.php => absent",
+              "data": {
+                "success": true,
+                "scriptRelativePath": "admin/cli/purge_caches.php",
+                "cliRoot": "C:\\mycode\\UCKK\\moodle\\moodle",
+                "scriptPath": "C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\purge_caches.php",
+                "localMoodleRoot": "C:\\mycode\\UCKK\\moodle\\moodle",
+                "localMoodleRuntime": "C:\\mycode\\UCKK\\moodle\\moodle\\public",
+                "candidateRoots": [
+                  "C:\\mycode\\UCKK\\moodle\\moodle",
+                  "C:\\mycode\\UCKK\\moodle\\moodle\\public"
+                ],
+                "probes": [
+                  {
+                    "root": "C:\\mycode\\UCKK\\moodle\\moodle",
+                    "script": "C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\purge_caches.php",
+                    "scriptExists": true,
+                    "rootExists": true
+                  },
+                  {
+                    "root": "C:\\mycode\\UCKK\\moodle\\moodle\\public",
+                    "script": "C:\\mycode\\UCKK\\moodle\\moodle\\public\\admin\\cli\\purge_caches.php",
+                    "scriptExists": false,
+                    "rootExists": true
+                  }
+                ],
+                "configProbes": [
+                  {
+                    "path": "C:\\mycode\\UCKK\\moodle\\moodle\\config.php",
+                    "exists": true
+                  },
+                  {
+                    "path": "C:\\mycode\\UCKK\\moodle\\moodle\\public\\config.php",
+                    "exists": true
+                  }
+                ]
+              },
+              "timestamp": "2026-09-24 21:16:35"
+            },
+            {
+              "name": "Exécuter purge caches",
+              "status": "Réussi",
+              "summary": "Caches Moodle locaux purgés.",
+              "detail": "Commande : php C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\purge_caches.php\r\nDossier courant : C:\\mycode\\UCKK\\moodle\\moodle\r\nCode de sortie : 0\r\nTimeout : False\r\nDurée : 4.68 s\r\n\r\nSTDOUT :\r\n(vide)\r\n\r\nSTDERR :\r\n(vide)",
+              "data": {
+                "success": true,
+                "timedOut": false,
+                "exitCode": 0,
+                "stdout": "",
+                "stderr": "",
+                "filePath": "php",
+                "arguments": [
+                  "C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\purge_caches.php"
+                ],
+                "workingDir": "C:\\mycode\\UCKK\\moodle\\moodle",
+                "timeoutSeconds": 180,
+                "commandLine": "php C:\\mycode\\UCKK\\moodle\\moodle\\admin\\cli\\purge_caches.php",
+                "startedAt": "2026-09-24 21:16:35.087",
+                "finishedAt": "2026-09-24 21:16:39.768",
+                "durationSeconds": 4.68
+              },
+              "timestamp": "2026-09-24 21:16:39"
+            }
+          ],
+          "startedAt": "2026-09-24 21:16:35",
+          "finishedAt": "2026-09-24 21:16:39",
+          "durationSeconds": 4.0
+        }
+      },
+      {
+        "id": "local.start_moodle",
+        "label": "Démarrer Moodle local",
+        "status": "Réussi",
+        "summary": "Réussi — Moodle local répond déjà : http://127.0.0.1:8000",
+        "result": {
+          "success": true,
+          "status": "Réussi",
+          "action": "Démarrer Moodle local",
+          "domain": "local",
+          "target": "Moodle local",
+          "dangerLevel": 2,
+          "mode": "application",
+          "summary": "Réussi — Moodle local répond déjà : http://127.0.0.1:8000",
+          "warnings": [],
+          "errors": [],
+          "nextStep": "Ouvrir Moodle local ou tester les pages locales.",
+          "reportPath": "",
+          "logPath": "",
+          "data": {
+            "baseUrl": "http://127.0.0.1:8000",
+            "localRuntime": "C:\\mycode\\UCKK\\moodle\\moodle\\public",
+            "phpBinary": "php",
+            "alreadyReady": true,
+            "check": {
+              "success": true,
+              "url": "http://127.0.0.1:8000",
+              "statusCode": 200,
+              "detail": "OK"
+            }
+          },
+          "steps": [
+            {
+              "name": "Vérifier Moodle local",
+              "status": "Réussi",
+              "summary": "Moodle local répond déjà.",
+              "detail": "http://127.0.0.1:8000",
+              "data": {
+                "success": true,
+                "url": "http://127.0.0.1:8000",
+                "statusCode": 200,
+                "detail": "OK"
+              },
+              "timestamp": "2026-09-24 21:16:41"
+            }
+          ],
+          "startedAt": "2026-09-24 21:16:39",
+          "finishedAt": "2026-09-24 21:16:41",
+          "durationSeconds": 2.0
+        }
+      },
+      {
+        "id": "local.open_uckk",
+        "label": "Ouvrir UCKK",
+        "status": "À vérifier dans le navigateur",
+        "summary": "Réussi — Moodle local répond et a été ouvert : http://127.0.0.1:8000/?theme=uckk",
+        "result": {
+          "success": true,
+          "status": "À vérifier dans le navigateur",
+          "action": "Ouvrir UCKK",
+          "domain": "local",
+          "target": "façade locale uckk",
+          "dangerLevel": 0,
+          "mode": "navigation",
+          "summary": "Réussi — Moodle local répond et a été ouvert : http://127.0.0.1:8000/?theme=uckk",
+          "warnings": [],
+          "errors": [],
+          "nextStep": "Vérifier la façade UCKK dans le navigateur.",
+          "reportPath": "",
+          "logPath": "",
+          "data": {
+            "baseUrl": "http://127.0.0.1:8000",
+            "url": "http://127.0.0.1:8000/?theme=uckk",
+            "baseCheck": {
+              "success": true,
+              "url": "http://127.0.0.1:8000",
+              "statusCode": 200,
+              "detail": "OK"
+            }
+          },
+          "steps": [
+            {
+              "name": "Vérifier Moodle local",
+              "status": "Réussi",
+              "summary": "Moodle local répond déjà.",
+              "detail": "http://127.0.0.1:8000",
+              "data": {
+                "success": true,
+                "url": "http://127.0.0.1:8000",
+                "statusCode": 200,
+                "detail": "OK"
+              },
+              "timestamp": "2026-09-24 21:16:41"
+            },
+            {
+              "name": "Ouvrir navigateur",
+              "status": "Réussi",
+              "summary": "Navigateur ouvert.",
+              "detail": "http://127.0.0.1:8000/?theme=uckk",
+              "data": null,
+              "timestamp": "2026-09-24 21:16:41"
+            }
+          ],
+          "startedAt": "2026-09-24 21:16:41",
+          "finishedAt": "2026-09-24 21:16:41",
+          "durationSeconds": 0.0
+        }
+      }
+    ],
+    "totalSteps": 8
+  },
+  "steps": null,
+  "startedAt": "2026-09-24 21:16:41",
+  "finishedAt": "",
+  "durationSeconds": null
+}
+
+
+Fin
+---
+Fin : 2026-09-24 21:16:41
+Statut : Terminé
+Résumé : La chaîne locale est terminée. Moodle local est à jour et UCKK a été ouvert.
+

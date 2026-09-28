@@ -1,0 +1,18 @@
+{
+  "moodle_root": "C:\\mycode\\UCKK\\moodle\\moodle",
+  "staging": "C:\\mycode\\UCKK\\moodle\\moodle_52_staging",
+  "uckk_source": "C:\\mycode\\UCKK\\uckk-moodle",
+  "ops_console": "C:\\mycode\\UCKK\\UCKK_ops_console",
+  "dbtype": "mariadb",
+  "dbhost": "127.0.0.1",
+  "dbname_old": "moodle",
+  "dbname_new": "moodle_52",
+  "dbuser": "moodle",
+  "dataroot_old": "C:\\moodledata",
+  "dataroot_new": "C:\\moodledata_52",
+  "wwwroot": "http://127.0.0.1:8000",
+  "admin_user": "admin",
+  "site_name": "UCKK Local",
+  "site_short": "UCKK",
+  "latest_core_backup": ""
+}

@@ -1,0 +1,165 @@
+﻿{
+  "schemaVersion": 1,
+  "app": {
+    "name": "UCKK Ops Console",
+    "root": "C:/mycode/UCKK/UCKK_ops_console",
+    "language": "fr",
+    "timezone": "America/Montreal"
+  },
+  "paths": {
+    "uckkMoodleSource": "C:/mycode/UCKK/uckk-moodle",
+    "localMoodleRoot": "C:/mycode/UCKK/moodle/moodle",
+    "localMoodleRuntime": "C:/mycode/UCKK/moodle/moodle/public",
+    "serverMoodleSource": "/opt/uckk/uckk-moodle",
+    "serverMoodleRoot": "/var/www/moodle",
+    "serverMoodleRuntime": "/var/www/moodle/public",
+    "reportsDir": "./reports",
+    "logsDir": "./logs",
+    "legacyDir": "./legacy",
+    "recoveryDir": "./recovery"
+  },
+  "urls": {
+    "localBase": "http://127.0.0.1:8000",
+    "serverBase": "https://uckk.org",
+    "localCourseIndex": "http://127.0.0.1:8000/local/uckk/courses.php",
+    "serverCourseIndex": "https://uckk.org/course/index.php",
+    "localMediatheque": "http://127.0.0.1:8000/local/uckk/mediatheque.php",
+    "serverMediatheque": "https://uckk.org/local/uckk/mediatheque.php"
+  },
+  "server": {
+    "sshHost": "57.129.115.159",
+    "sshUser": "ubuntu",
+    "sshTarget": "ubuntu@57.129.115.159",
+    "phpFpmService": "php8.3-fpm"
+  },
+  "git": {
+    "repoRoot": "C:/mycode/UCKK/uckk-moodle",
+    "remoteName": "origin",
+    "mainBranch": "main",
+    "sensitiveFilePatterns": [
+      "config.php",
+      ".env",
+      "*.sql",
+      "*.dump",
+      "*.bak",
+      "*.key",
+      "*id_rsa*",
+      "*private*",
+      "*secret*",
+      "*token*"
+    ]
+  },
+  "moodle": {
+    "localPhpPath": "php",
+    "serverPhpPath": "php",
+    "adminCliRelativePath": "admin/cli",
+    "purgeCachesScript": "admin/cli/purge_caches.php",
+    "upgradeScript": "admin/cli/upgrade.php"
+  },
+  "mediatheque": {
+    "manifestPath": "C:/mycode/UCKK/uckk-moodle/content/mediatheque/mediatheque.catalog.json",
+    "serviceName": "mod_uckkarchive_search_mediatheque",
+    "minimumExpectedItems": 100,
+    "protectAgainstPartialSource": true,
+    "localArchiveId": 0,
+    "localCourseId": 0,
+    "localCmId": 0,
+    "localContextId": 0,
+    "serverArchiveId": 114,
+    "serverCourseId": 115,
+    "serverCmId": 332,
+    "serverContextId": 480
+  },
+  "moodleData": {
+    "sourceDir": "C:/mycode/UCKK/uckk-moodle/academic_registry_json",
+    "categoriesFile": "categories.json",
+    "coursesFile": "courses.json",
+    "programsFile": "programs.json",
+    "pathwaysFile": "pathways.json",
+    "rolesFile": "roles.json",
+    "permissionsFile": "permissions.json",
+    "badgesFile": "badges.json",
+    "competenciesFile": "competencies.json"
+  },
+  "sync": {
+    "excludePatterns": [
+      ".git",
+      ".gitignore",
+      "node_modules",
+      "vendor",
+      "reports",
+      "logs",
+      "legacy",
+      "recovery",
+      "*.sql",
+      "*.dump",
+      "*.bak",
+      "*.tmp",
+      ".env",
+      "config.php"
+    ]
+  },
+  "reports": {
+    "dir": "./reports",
+    "format": "markdown",
+    "keepLast": 200
+  },
+  "logs": {
+    "dir": "./logs",
+    "level": "verbose",
+    "keepLast": 200
+  },
+  "safety": {
+    "confirmGitWrites": true,
+    "confirmServerActions": true,
+    "confirmDatabaseWrites": true,
+    "confirmLocalDatabaseWrites": true,
+    "confirmServerDatabaseWrites": true,
+    "requireSimulationBeforeApply": true,
+    "requireSimulationBeforeServerApply": true,
+    "forbidDirectTableCopy": true,
+    "forbidSqlDumpNormalWorkflow": true,
+    "confirmRecoveryActions": true,
+    "requireBackupForRecovery": true,
+    "requireBackupBeforeRecovery": true,
+    "requireBackupBeforeDangerLevel": 5,
+    "blockUnclassifiedLegacyTools": true,
+    "blockDangerousActionsOnStartup": true,
+    "maskSecretsInReports": true,
+    "maskSecretsInLogs": true
+  },
+  "publicFacades": {
+    "defaultId": "uckk",
+    "testPaths": [
+      "/",
+      "/local/uckk/about.php",
+      "/local/uckk/programs.php",
+      "/local/uckk/courses.php",
+      "/local/uckk/mediatheque.php"
+    ],
+    "sites": [
+      {
+        "id": "uckk",
+        "label": "UCKK",
+        "theme": "uckk",
+        "expectedMarker": "Univers-Cité King Klown"
+      },
+      {
+        "id": "ucc",
+        "label": "UCC — Univers-Cité Catho",
+        "theme": "ucc",
+        "expectedMarker": "Univers-Cité Catho"
+      },
+      {
+        "id": "math",
+        "label": "Math — Univers-Cité des mathématiques",
+        "theme": "ucmath",
+        "expectedMarker": "Univers-Cité des mathématiques"
+      }
+    ]
+  },
+  "ui": {
+    "verboseResults": true,
+    "maxCommandOutputChars": 20000
+  }
+}

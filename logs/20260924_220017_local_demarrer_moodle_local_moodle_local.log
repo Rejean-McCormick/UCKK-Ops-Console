@@ -1,0 +1,82 @@
+UCKK Ops Console — log technique
+
+Début : 2026-09-24 22:00:17
+Action : Démarrer Moodle local
+Domaine : local
+Cible : Moodle local
+
+Entrées
+-------
+[2026-09-24 22:00:17] [INFO] Réussi — Moodle local a été démarré et répond : http://127.0.0.1:8000
+Données :
+{
+  "success": true,
+  "status": "Réussi",
+  "action": "Démarrer Moodle local",
+  "domain": "local",
+  "target": "Moodle local",
+  "dangerLevel": 2,
+  "mode": "application",
+  "summary": "Réussi — Moodle local a été démarré et répond : http://127.0.0.1:8000",
+  "warnings": [],
+  "errors": [],
+  "nextStep": "Ouvrir Moodle local ou tester les pages locales.",
+  "reportPath": "",
+  "logPath": "",
+  "data": {
+    "baseUrl": "http://127.0.0.1:8000",
+    "localRuntime": "C:\\mycode\\UCKK\\moodle\\moodle\\public",
+    "phpBinary": "php",
+    "arguments": [
+      "-S",
+      "127.0.0.1:8000",
+      "-t",
+      "C:\\mycode\\UCKK\\moodle\\moodle\\public"
+    ],
+    "processId": 11736,
+    "readyCheck": {
+      "success": true,
+      "url": "http://127.0.0.1:8000",
+      "statusCode": 200,
+      "detail": "OK"
+    }
+  },
+  "steps": [
+    {
+      "name": "Lancer serveur PHP local",
+      "status": "Réussi",
+      "summary": "Serveur PHP local lancé.",
+      "detail": "php -S 127.0.0.1:8000 -t C:\\mycode\\UCKK\\moodle\\moodle\\public",
+      "data": {
+        "baseUrl": "http://127.0.0.1:8000",
+        "processId": 11736,
+        "runtime": "C:\\mycode\\UCKK\\moodle\\moodle\\public"
+      },
+      "timestamp": "2026-09-24 22:00:10"
+    },
+    {
+      "name": "Attendre Moodle local",
+      "status": "Réussi",
+      "summary": "Moodle local répond.",
+      "detail": "http://127.0.0.1:8000",
+      "data": {
+        "success": true,
+        "url": "http://127.0.0.1:8000",
+        "statusCode": 200,
+        "detail": "OK"
+      },
+      "timestamp": "2026-09-24 22:00:17"
+    }
+  ],
+  "startedAt": "2026-09-24 22:00:08",
+  "finishedAt": "2026-09-24 22:00:17",
+  "durationSeconds": 9.0
+}
+
+
+Fin
+---
+Fin : 2026-09-24 22:00:17
+Statut : Terminé
+Résumé : Réussi — Moodle local a été démarré et répond : http://127.0.0.1:8000
+

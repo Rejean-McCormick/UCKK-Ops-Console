@@ -1,0 +1,15 @@
+{
+  "root": "C:\\mycode\\UCKK\\moodle\\moodle",
+  "staging": "C:\\mycode\\UCKK\\moodle\\moodle_52_staging",
+  "dataroot": "C:\\mycode\\UCKK\\moodledata",
+  "ops": "C:\\mycode\\UCKK\\UCKK_ops_console",
+  "wwwroot": "http://127.0.0.1:8000",
+  "dbhost": "127.0.0.1",
+  "dbname": "uckk_moodle_52",
+  "dbuser": "uckk_moodle",
+  "db_admin_user": "root",
+  "adminuser": "admin",
+  "fullname": "UCKK Local",
+  "shortname": "UCKK",
+  "launch_ops": true
+}
