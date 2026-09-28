@@ -1,4 +1,4 @@
-﻿# 05 — Configuration et chemins
+# 05 — Configuration et chemins
 
 ## 1. Rôle de ce document
 
@@ -733,7 +733,17 @@ Champs officiels :
 sshHost
 sshUser
 sshTarget
+sshPort
+sshKey
+remoteRoot
+domain
+aliases
+konnaxionInstance
+konnaxionRoot
+edgeNetwork
 ```
+
+Les valeurs par défaut sont alignées sur `UCKK Publisher` afin que les deux outils ciblent le même VPS Netcup.
 
 ## 28. Champ `server.sshHost`
 
@@ -752,7 +762,7 @@ Adresse ou IP du serveur.
 Valeur connue :
 
 ```text
-57.129.115.159
+2.56.97.41
 ```
 
 Ce champ n’est pas un secret en soi, mais il ne doit pas être mélangé avec un mot de passe.
@@ -774,7 +784,7 @@ Nom d’utilisateur utilisé pour la connexion SSH.
 Valeur connue :
 
 ```text
-ubuntu
+kx-admin
 ```
 
 ## 30. Champ `server.sshTarget`
@@ -794,7 +804,7 @@ Cible SSH complète sous forme utilisateur@serveur.
 Valeur connue :
 
 ```text
-ubuntu@57.129.115.159
+kx-admin@2.56.97.41
 ```
 
 Ce champ peut être construit automatiquement à partir de :
@@ -809,6 +819,20 @@ Règle :
 ```text
 Ne pas répéter inutilement sshTarget si l’application peut le construire de manière fiable.
 ```
+
+### Paramètres Publisher par défaut
+
+```text
+sshPort = 22
+sshKey = C:\Users\rejea\.ssh\id_ed25519
+remoteRoot = /opt/uckk
+domain = uckk.org
+konnaxionInstance = konnaxion-prod
+konnaxionRoot = /opt/konnaxion
+edgeNetwork = kx-konnaxion-prod-public
+```
+
+`sshKey` désigne le chemin local de la clé privée ; le contenu de la clé n'est jamais stocké dans la configuration Ops Console. Les commandes SSH de l'Ops Console utilisent `sshPort` et `sshKey` lorsqu'ils sont renseignés.
 
 ## 31. Section `git`
 
@@ -1344,9 +1368,17 @@ Exemple de départ :
     "serverCourseIndex": "https://uckk.org/course/index.php"
   },
   "server": {
-    "sshHost": "57.129.115.159",
-    "sshUser": "ubuntu",
-    "sshTarget": "ubuntu@57.129.115.159"
+    "sshHost": "2.56.97.41",
+    "sshUser": "kx-admin",
+    "sshTarget": "kx-admin@2.56.97.41",
+    "sshPort": 22,
+    "sshKey": "C:\\Users\\rejea\\.ssh\\id_ed25519",
+    "remoteRoot": "/opt/uckk",
+    "domain": "uckk.org",
+    "aliases": "",
+    "konnaxionInstance": "konnaxion-prod",
+    "konnaxionRoot": "/opt/konnaxion",
+    "edgeNetwork": "kx-konnaxion-prod-public"
   },
   "git": {
     "repoRoot": "C:\\\\mycode\\\\UCKK\\\\uckk-moodle",
@@ -1698,3 +1730,20 @@ Ces chemins peuvent être différents, notamment lorsque Moodle expose un sous-d
 
 L'action `Diagnostiquer Moodle local` teste les racines candidates et affiche le chemin
 effectivement retenu.
+
+## SSH serveur — alignement UCKK Publisher (2026-09-28)
+
+La connexion serveur de l'Ops Console utilise les mêmes paramètres de transport que `UCKK Publisher` :
+
+```text
+host = 2.56.97.41
+user = kx-admin
+port = 22
+clé = C:/Users/rejea/.ssh/id_ed25519
+ConnectTimeout = 12 s
+```
+
+L'appel OpenSSH impose aussi `BatchMode=yes`, l'authentification par clé publique, désactive les authentifications mot de passe/interactives et utilise `StrictHostKeyChecking=accept-new`.
+
+`accept-new` est important pour une première connexion depuis l'Ops Console : l'application lance SSH sans fenêtre console, donc une demande interactive de confirmation de l'empreinte du serveur pourrait sinon attendre indéfiniment jusqu'au timeout de l'action.
+

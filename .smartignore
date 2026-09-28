@@ -1,0 +1,11 @@
+# UCKK Ops Console - SmartSnap ignore
+# Fichiers qui peuvent rester versionnés dans Git,
+# mais qui ne doivent pas alourdir ou polluer le snapshot.
+
+.smartignore
+
+# Historique opérationnel utile dans Git, inutile dans un snapshot de code.
+reports/**
+
+# Index d'un ancien snapshot : le nouveau snapshot génère son propre index.
+SNAPSHOT_INDEX.txt

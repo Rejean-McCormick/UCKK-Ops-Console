@@ -781,6 +781,8 @@ vérifier uckk.org.
 
 Une publication en chaîne doit annoncer ses étapes avant de commencer.
 
+Lorsqu’elle est lancée depuis le bouton **« Publier jusqu’à uckk.org »**, les étapes locales peuvent démarrer ou préparer Moodle local, mais elles ne doivent pas ouvrir `127.0.0.1` dans le navigateur. Le seul navigateur ouvert automatiquement par cette chaîne est `urls.serverBase`, après réussite de la publication et de la vérification serveur. Si une étape serveur échoue, aucun site local ne doit être ouvert comme résultat final.
+
 Elle doit demander confirmation.
 
 Message recommandé :

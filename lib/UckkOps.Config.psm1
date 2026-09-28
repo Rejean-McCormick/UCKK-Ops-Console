@@ -803,6 +803,8 @@ function Test-UckkConfig {
         "server.sshUser",
         "server.sshHost",
         "server.sshTarget",
+        "server.sshPort",
+        "server.sshKey",
         "git.repoRoot",
         "mediatheque.serviceName"
     )

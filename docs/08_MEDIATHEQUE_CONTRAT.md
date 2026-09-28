@@ -1100,6 +1100,48 @@ Ces valeurs ne doivent pas être codées en dur dans le code.
 Elles doivent venir de la configuration.
 ```
 
+Deux modes de cible sont reconnus :
+
+```text
+Mode site-wide :
+archiveId = 0
+courseId = 0
+cmId = 0
+contextId = 0
+
+Mode lié à une activité Moodle :
+archiveId > 0
+courseId > 0
+cmId > 0
+contextId > 0
+```
+
+Le mode **site-wide** représente une Médiathèque publique qui n'est pas liée artificiellement à l'activité `uckkarchive` d'un cours particulier. Il est valide pour l'action de **vérification** de la Médiathèque.
+
+Le helper actuel de **simulation/application** reste orienté vers une cible liée à une activité Moodle explicite. Tant que ce pipeline n'est pas rendu pleinement *library-aware*, une cible site-wide `0/0/0/0` ne doit pas être utilisée pour écrire dans la base.
+
+Une configuration mixte est invalide. Par exemple :
+
+```text
+archiveId = 0
+courseId = 115
+cmId = 332
+contextId = 480
+```
+
+Il ne faut jamais copier les identifiants d'une archive de cours arbitraire uniquement pour faire passer le vérificateur.
+
+État local validé le 28 septembre 2026 :
+
+```text
+localArchiveId = 0
+localCourseId = 0
+localCmId = 0
+localContextId = 0
+```
+
+Cette configuration correspond au mode site-wide local.
+
 ## 27. Cible serveur temporaire connue
 
 L’état serveur actuel peut utiliser une cible existante :

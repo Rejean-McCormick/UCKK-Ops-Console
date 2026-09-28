@@ -1,0 +1,43 @@
+# UCKK Ops Console - Git ignore
+# Fichiers locaux, générés ou propres à une machine.
+
+# Outils locaux
+/SmartSnap.pyw
+/GitSink.bat
+
+# Configuration locale réelle : le modèle .example.json reste versionné.
+/config/uckk-ops-console.config.json
+
+# États locaux / runtime
+/*.state.json
+/*_state.json
+/logs/
+*.log
+
+# Sauvegardes et fichiers temporaires
+*.bak
+*.bak_*
+*.bak-*
+*.bak.*
+*.backup
+*.orig
+*.rej
+*.tmp
+*.temp
+*~
+*.swp
+*.swo
+
+# OS / éditeurs
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Python local
+__pycache__/
+*.py[cod]
+
+# Secrets / environnements locaux
+.env
+.env.*
+!.env.example

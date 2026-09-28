@@ -470,7 +470,21 @@ param(
     [int] $TimeoutSeconds = 120
 )
 
-$sshTarget = Get-UckkServerConfigValue -Config $Config -Path 'server.sshTarget' -Required
+$sshTarget = [string](Get-UckkServerConfigValue -Config $Config -Path 'server.sshTarget' -Default '')
+if ([string]::IsNullOrWhiteSpace($sshTarget)) {
+    $sshUser = [string](Get-UckkServerConfigValue -Config $Config -Path 'server.sshUser' -Default '')
+    $sshHost = [string](Get-UckkServerConfigValue -Config $Config -Path 'server.sshHost' -Default '')
+    if (-not [string]::IsNullOrWhiteSpace($sshUser) -and -not [string]::IsNullOrWhiteSpace($sshHost)) {
+        $sshTarget = "$sshUser@$sshHost"
+    }
+}
+if ([string]::IsNullOrWhiteSpace($sshTarget)) {
+    throw 'Configuration missing: server.sshTarget or server.sshUser/server.sshHost'
+}
+
+$sshPort = [int](Get-UckkServerConfigValue -Config $Config -Path 'server.sshPort' -Default 22)
+$sshKey = [string](Get-UckkServerConfigValue -Config $Config -Path 'server.sshKey' -Default '')
+$connectTimeout = [int](Get-UckkServerConfigValue -Config $Config -Path 'server.connectTimeoutSeconds' -Default 12)
 
 $psi = [System.Diagnostics.ProcessStartInfo]::new()
 $psi.FileName = 'ssh'
@@ -478,6 +492,35 @@ $psi.UseShellExecute = $false
 $psi.RedirectStandardOutput = $true
 $psi.RedirectStandardError = $true
 $psi.CreateNoWindow = $true
+# Keep the SSH invocation aligned with UCKK Publisher. In particular,
+# StrictHostKeyChecking=accept-new avoids an invisible first-connection host-key
+# prompt when the command is executed without a console window.
+$psi.ArgumentList.Add('-T')
+$psi.ArgumentList.Add('-p')
+$psi.ArgumentList.Add([string]$sshPort)
+if (-not [string]::IsNullOrWhiteSpace($sshKey)) {
+    if (-not (Test-Path -LiteralPath $sshKey -PathType Leaf)) {
+        return [pscustomobject]@{
+            exitCode = 125
+            stdout   = ''
+            stderr   = "SSH key not found: $sshKey"
+        }
+    }
+    $psi.ArgumentList.Add('-i')
+    $psi.ArgumentList.Add($sshKey)
+}
+$psi.ArgumentList.Add('-o')
+$psi.ArgumentList.Add('BatchMode=yes')
+$psi.ArgumentList.Add('-o')
+$psi.ArgumentList.Add('PreferredAuthentications=publickey')
+$psi.ArgumentList.Add('-o')
+$psi.ArgumentList.Add('PasswordAuthentication=no')
+$psi.ArgumentList.Add('-o')
+$psi.ArgumentList.Add('KbdInteractiveAuthentication=no')
+$psi.ArgumentList.Add('-o')
+$psi.ArgumentList.Add('StrictHostKeyChecking=accept-new')
+$psi.ArgumentList.Add('-o')
+$psi.ArgumentList.Add("ConnectTimeout=$connectTimeout")
 $psi.ArgumentList.Add($sshTarget)
 $psi.ArgumentList.Add($RemoteCommand)
 
@@ -599,12 +642,21 @@ $logs = @()
 
 try {
     $sshTarget = Get-UckkServerConfigValue -Config $Config -Path 'server.sshTarget' -Required
-    $steps += New-UckkServerStep -Name 'Lire configuration serveur' -Status 'Réussi' -Summary $sshTarget
+    $sshPort = [int](Get-UckkServerConfigValue -Config $Config -Path 'server.sshPort' -Default 22)
+    $sshKey = [string](Get-UckkServerConfigValue -Config $Config -Path 'server.sshKey' -Default '')
+    $connectTimeout = [int](Get-UckkServerConfigValue -Config $Config -Path 'server.connectTimeoutSeconds' -Default 12)
+    $keyExists = (-not [string]::IsNullOrWhiteSpace($sshKey)) -and (Test-Path -LiteralPath $sshKey -PathType Leaf)
+    $steps += New-UckkServerStep -Name 'Lire configuration serveur' -Status 'Réussi' -Summary ("{0} port {1}" -f $sshTarget, $sshPort)
 
     $command = "printf 'UCKK_SERVER_OK\n'; hostname; whoami"
     $result = Invoke-UckkServerSshCommand -Config $Config -RemoteCommand $command -TimeoutSeconds 30
 
     $logs += "SSH target: $sshTarget"
+    $logs += "SSH port: $sshPort"
+    $logs += "SSH key: $sshKey"
+    $logs += "SSH key exists: $keyExists"
+    $logs += "SSH ConnectTimeout: $connectTimeout s"
+    $logs += "SSH host-key policy: accept-new"
     $logs += "Remote command:"
     $logs += $command
     $logs += "Exit code: $($result.exitCode)"
@@ -627,7 +679,11 @@ try {
             -NextStep 'Aucune action requise.' `
             -Data @{
                 sshTarget = $sshTarget
-                stdout    = $result.stdout
+                sshPort = $sshPort
+                sshKey = $sshKey
+                sshKeyExists = $keyExists
+                connectTimeoutSeconds = $connectTimeout
+                stdout = $result.stdout
             } `
             -Steps $steps
 
@@ -648,8 +704,12 @@ try {
         -NextStep 'Vérifier la configuration serveur ou la connexion SSH.' `
         -Data @{
             sshTarget = $sshTarget
-            exitCode  = $result.exitCode
-            stderr    = $result.stderr
+            sshPort = $sshPort
+            sshKey = $sshKey
+            sshKeyExists = $keyExists
+            connectTimeoutSeconds = $connectTimeout
+            exitCode = $result.exitCode
+            stderr = $result.stderr
         } `
         -Steps $steps
 

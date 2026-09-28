@@ -1,4 +1,4 @@
-﻿# 03 — Interface Accueil
+# 03 — Interface Accueil
 
 ## 1. Rôle de ce document
 
@@ -983,7 +983,7 @@ Il peut afficher une commande dans le détail technique ou le rapport.
 Exemple à éviter dans l’accueil :
 
 ```text
-ssh ubuntu@57.129.115.159 "cd /opt/uckk/uckk-moodle && git pull"
+ssh kx-admin@2.56.97.41 "cd /opt/uckk/uckk-moodle && git pull"
 ```
 
 Exemple correct dans l’accueil :

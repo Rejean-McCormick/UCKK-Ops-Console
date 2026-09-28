@@ -1,4 +1,4 @@
-﻿#Requires -Version 7.0
+#Requires -Version 7.0
 <#
 .SYNOPSIS
   Action wiring layer for UCKK Ops Console.
@@ -599,7 +599,6 @@ function Invoke-UckkOpsHomePublishToUckk {
             "local.moodle_upgrade",
             "local.purge_caches",
             "local.start_moodle",
-            "local.open_uckk",
             "git.verify",
             "git.sensitive_files",
             "git.push",

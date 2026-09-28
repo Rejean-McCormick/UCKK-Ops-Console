@@ -901,6 +901,8 @@ Cette fonction doit utiliser la configuration :
 server.sshUser
 server.sshHost
 server.sshTarget
+server.sshPort
+server.sshKey
 paths.serverMoodleSource
 paths.serverMoodleRuntime
 paths.serverMoodleRoot

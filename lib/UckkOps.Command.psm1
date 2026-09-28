@@ -558,6 +558,8 @@ function Invoke-UckkSshCommand {
         $SshPort = [int](Get-UckkCommandConfigValue -Config $Config -Path 'server.sshPort' -Default 22)
     }
 
+    $sshKey = [string](Get-UckkCommandConfigValue -Config $Config -Path 'server.sshKey' -Default '')
+
     if ($ConnectTimeoutSeconds -le 0) {
         $ConnectTimeoutSeconds = [int](Get-UckkCommandConfigValue -Config $Config -Path 'server.connectTimeoutSeconds' -Default 20)
     }
@@ -599,7 +601,14 @@ function Invoke-UckkSshCommand {
     }
 
     $args = @(
-        '-p', [string]$SshPort,
+        '-p', [string]$SshPort
+    )
+
+    if (-not [string]::IsNullOrWhiteSpace($sshKey)) {
+        $args += @('-i', $sshKey)
+    }
+
+    $args += @(
         '-o', 'BatchMode=yes',
         '-o', "ConnectTimeout=$ConnectTimeoutSeconds",
         $SshTarget,

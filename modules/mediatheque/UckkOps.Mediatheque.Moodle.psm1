@@ -203,6 +203,15 @@ function Get-UckkMediathequeTargetSettings {
 
     $serviceName = [string](Get-UckkObjectValue -Object $Config -Path "mediatheque.serviceName" -Default "mod_uckkarchive_search_mediatheque")
 
+    $targetIds = @($archiveId, $courseId, $cmId, $contextId)
+    $targetMode = if (($targetIds | Where-Object { $_ -ne 0 }).Count -eq 0) {
+        "site-wide"
+    } elseif (($targetIds | Where-Object { $_ -le 0 }).Count -eq 0) {
+        "activity-bound"
+    } else {
+        "invalid"
+    }
+
     return [pscustomobject]@{
         target          = $Target
         isServer        = $isServer
@@ -215,6 +224,7 @@ function Get-UckkMediathequeTargetSettings {
         courseId        = $courseId
         cmId            = $cmId
         contextId       = $contextId
+        targetMode      = $targetMode
         serviceName     = $serviceName
         tableNames      = Get-UckkMediathequeMoodleTableNames
     }
@@ -224,7 +234,10 @@ function Test-UckkMediathequeTargetSettings {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
-        [object]$Settings
+        [object]$Settings,
+
+        [ValidateSet("verify", "simulate", "apply")]
+        [string]$Operation = "verify"
     )
 
     $errors = @()
@@ -246,20 +259,23 @@ function Test-UckkMediathequeTargetSettings {
         $errors += "Nom du service Médiathèque manquant."
     }
 
-    if ($Settings.archiveId -le 0) {
-        $errors += "archiveId Médiathèque manquant ou invalide."
-    }
+    $targetIds = @(
+        [int]$Settings.archiveId,
+        [int]$Settings.courseId,
+        [int]$Settings.cmId,
+        [int]$Settings.contextId
+    )
 
-    if ($Settings.courseId -le 0) {
-        $errors += "courseId Médiathèque manquant ou invalide."
-    }
+    $hasNegativeId = ($targetIds | Where-Object { $_ -lt 0 }).Count -gt 0
+    $isSiteWide = ($targetIds | Where-Object { $_ -ne 0 }).Count -eq 0
+    $isActivityBound = ($targetIds | Where-Object { $_ -le 0 }).Count -eq 0
 
-    if ($Settings.cmId -le 0) {
-        $errors += "cmId Médiathèque manquant ou invalide."
-    }
-
-    if ($Settings.contextId -le 0) {
-        $errors += "contextId Médiathèque manquant ou invalide."
+    if ($hasNegativeId) {
+        $errors += "Les identifiants Médiathèque ne peuvent pas être négatifs."
+    } elseif (-not $isSiteWide -and -not $isActivityBound) {
+        $errors += "Configuration Médiathèque incohérente : utiliser soit 0/0/0/0 pour une cible site-wide, soit quatre identifiants strictement positifs pour une cible liée à une activité."
+    } elseif ($isSiteWide -and $Operation -ne "verify") {
+        $errors += "La cible Médiathèque site-wide (archiveId/courseId/cmId/contextId = 0) est prise en charge pour la vérification seulement. Le pipeline actuel de simulation/application reste lié à une activité Moodle explicite."
     }
 
     if ($Settings.target -eq "local") {
@@ -287,6 +303,13 @@ function Test-UckkMediathequeTargetSettings {
             -Data $Settings
     }
 
+    $targetModeLabel = if ($isSiteWide) { "site-wide" } else { "liée à une activité Moodle" }
+    $nextStep = if ($Operation -eq "verify") {
+        "Lancer la vérification Médiathèque."
+    } else {
+        "Continuer le workflow Médiathèque avec simulation avant toute application."
+    }
+
     return New-UckkMediathequeMoodleResult `
         -Success $true `
         -Status $(if ($warnings.Count -gt 0) { "Réussi avec avertissements" } else { "Réussi" }) `
@@ -294,10 +317,10 @@ function Test-UckkMediathequeTargetSettings {
         -Target $Settings.target `
         -DangerLevel 1 `
         -Mode "vérification" `
-        -Summary "Réussi — la cible Médiathèque Moodle est configurée." `
+        -Summary "Réussi — la cible Médiathèque Moodle est configurée ($targetModeLabel)." `
         -Warnings $warnings `
         -Errors @() `
-        -NextStep "Lancer une simulation Médiathèque avant toute application." `
+        -NextStep $nextStep `
         -Data $Settings
 }
 
@@ -997,7 +1020,7 @@ function Invoke-UckkMediathequeMoodleCli {
     )
 
     $settings = Get-UckkMediathequeTargetSettings -Config $Config -Target $Target
-    $settingsCheck = Test-UckkMediathequeTargetSettings -Settings $settings
+    $settingsCheck = Test-UckkMediathequeTargetSettings -Settings $settings -Operation $Operation
 
     if (-not $settingsCheck.success) {
         return $settingsCheck

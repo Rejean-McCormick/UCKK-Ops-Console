@@ -1,4 +1,4 @@
-﻿#Requires -Version 7.0
+#Requires -Version 7.0
 Set-StrictMode -Off
 <#
 .SYNOPSIS
@@ -235,7 +235,7 @@ function Get-UckkActionRegistry {
         New-UckkActionFromMap -Map @{
             Id = "home.publish_to_uckk"
             Label = "Publier jusqu'à uckk.org"
-            Description = "Exécute la chaîne complète vers le public : préparation locale, vérifications Git, envoi Git, publication serveur, vérification de uckk.org et ouverture du site public."
+            Description = "Exécute la chaîne complète vers le public : préparation locale sans ouvrir le navigateur local, vérifications Git, envoi Git, publication serveur, vérification de uckk.org et ouverture du site public uniquement à la fin."
             Domain = "server"
             Target = "uckk.org"
             DangerLevel = 5

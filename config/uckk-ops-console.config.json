@@ -1,4 +1,4 @@
-﻿{
+{
   "schemaVersion": 1,
   "app": {
     "name": "UCKK Ops Console",
@@ -27,10 +27,19 @@
     "serverMediatheque": "https://uckk.org/local/uckk/mediatheque.php"
   },
   "server": {
-    "sshHost": "57.129.115.159",
-    "sshUser": "ubuntu",
-    "sshTarget": "ubuntu@57.129.115.159",
-    "phpFpmService": "php8.3-fpm"
+    "sshHost": "2.56.97.41",
+    "sshUser": "kx-admin",
+    "sshTarget": "kx-admin@2.56.97.41",
+    "sshPort": 22,
+    "sshKey": "C:/Users/rejea/.ssh/id_ed25519",
+    "remoteRoot": "/opt/uckk",
+    "domain": "uckk.org",
+    "aliases": "",
+    "konnaxionInstance": "konnaxion-prod",
+    "konnaxionRoot": "/opt/konnaxion",
+    "edgeNetwork": "kx-konnaxion-prod-public",
+    "phpFpmService": "php8.3-fpm",
+    "connectTimeoutSeconds": 12
   },
   "git": {
     "repoRoot": "C:/mycode/UCKK/uckk-moodle",
