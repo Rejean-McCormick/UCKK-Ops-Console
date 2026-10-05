@@ -1,0 +1,74 @@
+name: Fast CI
+
+on:
+  push:
+    paths-ignore:
+      - "docs/**"
+      - "legacy/**"
+      - "recovery/**"
+      - "README*.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: uckk-ops-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static-validation:
+    name: PowerShell + Python + config
+    runs-on: windows-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Parse every PowerShell source file
+        shell: powershell
+        run: |
+          $sourceFiles = Get-ChildItem -Path . -Recurse -File | Where-Object {
+            $_.Extension -in '.ps1', '.psm1'
+          }
+
+          $allErrors = @()
+          foreach ($file in $sourceFiles) {
+            $tokens = $null
+            $parseErrors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              $file.FullName,
+              [ref]$tokens,
+              [ref]$parseErrors
+            ) | Out-Null
+
+            foreach ($parseError in $parseErrors) {
+              $allErrors += [PSCustomObject]@{
+                File    = $file.FullName
+                Line    = $parseError.Extent.StartLineNumber
+                Column  = $parseError.Extent.StartColumnNumber
+                Message = $parseError.Message
+              }
+            }
+          }
+
+          if ($allErrors.Count -gt 0) {
+            $allErrors | Format-Table -AutoSize | Out-String | Write-Host
+            throw "PowerShell parse failed with $($allErrors.Count) error(s)."
+          }
+
+          Write-Host "Parsed $($sourceFiles.Count) PowerShell source files successfully."
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Compile Python GUI helper
+        shell: powershell
+        run: python -m py_compile UCKK_Moodle52_FRESH_INSTALL_v6.pyw
+
+      - name: Validate example configuration JSON
+        shell: powershell
+        run: python -c "import json, pathlib; p=pathlib.Path('config/uckk-ops-console.config.example.json'); data=json.loads(p.read_text(encoding='utf-8-sig')); assert isinstance(data, dict), 'example config must be a JSON object'; print('JSON config OK')"
