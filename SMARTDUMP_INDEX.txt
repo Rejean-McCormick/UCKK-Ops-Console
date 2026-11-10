@@ -1,0 +1,64 @@
+SMART DUMPER INDEX
+==================
+generated_at: 2026-11-09T16:33:45.845746
+source_root: C:\mycode\UCKK\UCKK_ops_console
+mode: snapshot
+zip_file: UCKK_ops_console_Code_snapshot.zip
+embedded_index: SMARTDUMP_INDEX.txt
+file_count: 51
+total_bytes: 1316092
+compression: ZIP_DEFLATED level 1
+
+FILES
+-----
+.github/workflows/ci.yml	2387 bytes
+.gitignore	740 bytes
+app/UckkOpsConsole.Actions.ps1	61099 bytes
+app/UckkOpsConsole.Gui.ps1	91330 bytes
+app/UckkOpsConsole.Layout.ps1	16325 bytes
+app/UckkOpsConsole.State.ps1	22119 bytes
+config/uckk-ops-console.config.example.json	4527 bytes
+Diagnose-UckkMoodleLocal.ps1	8333 bytes
+docs/01_PRINCIPES_DE_L_APPLICATION (1).md	21903 bytes
+docs/02_VOCABULAIRE_OBLIGATOIRE.md	31637 bytes
+docs/03_INTERFACE_ACCUEIL.md	24899 bytes
+docs/04_INTERFACE_ONGLETS_SPECIALISES.md	26152 bytes
+docs/05_CONFIGURATION_ET_CHEMINS.md	27641 bytes
+docs/06_ACTIONS_SECURITE_CONFIRMATIONS.md	23910 bytes
+docs/07_WORKFLOW_LOCAL_GIT_SERVEUR.md	22164 bytes
+docs/08_MEDIATHEQUE_CONTRAT.md	36631 bytes
+docs/09_DONNEES_MOODLE_CONTRAT.md	28842 bytes
+docs/10_RAPPORTS_LOGS_ERREURS.md	27963 bytes
+docs/11_LEGACY_ET_RECOVERY.md	25926 bytes
+docs/12_CONTRAT_TECHNIQUE_DU_CODE.md	49262 bytes
+docs/13_SWITCHER_MULTI_FACADES.md	3149 bytes
+docs/14_DIAGNOSTIC_LOCAL_VERBOSE.md	3657 bytes
+Launch_MULTiSmartDump.lnk	1359 bytes
+legacy/README.md	2936 bytes
+lib/UckkOps.ActionRegistry.psm1	70196 bytes
+lib/UckkOps.Command.psm1	20448 bytes
+lib/UckkOps.Config.psm1	37455 bytes
+lib/UckkOps.Json.psm1	25133 bytes
+lib/UckkOps.Log.psm1	13627 bytes
+lib/UckkOps.Path.psm1	19040 bytes
+lib/UckkOps.Report.psm1	17158 bytes
+lib/UckkOps.Result.psm1	27375 bytes
+lib/UckkOps.Security.psm1	18588 bytes
+lib/UckkOps.Url.psm1	13919 bytes
+modules/git/UckkOps.Git.psm1	35779 bytes
+modules/local/UckkOps.Local.psm1	99454 bytes
+modules/mediatheque/UckkOps.Mediatheque.Manifest.psm1	21598 bytes
+modules/mediatheque/UckkOps.Mediatheque.Moodle.psm1	43247 bytes
+modules/mediatheque/UckkOps.Mediatheque.psm1	35036 bytes
+modules/moodle-data/UckkOps.MoodleData.Apply.psm1	32111 bytes
+modules/moodle-data/UckkOps.MoodleData.Json.psm1	29722 bytes
+modules/moodle-data/UckkOps.MoodleData.psm1	33688 bytes
+modules/server/UckkOps.Server.psm1	60296 bytes
+modules/tests/UckkOps.Tests.psm1	28368 bytes
+README.md	7102 bytes
+README_UPDATE_ALPHA.md	3160 bytes
+recovery/README.md	4503 bytes
+START_UCKK_OPS_CONSOLE.ps1	7948 bytes
+tools/Diagnose-UckkMoodleLocal.ps1	8249 bytes
+UCKK_Moodle52_FRESH_INSTALL_v6.pyw	36180 bytes
+UCKK_Ops_Console_RUN.bat	1821 bytes
