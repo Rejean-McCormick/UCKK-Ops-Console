@@ -56,10 +56,10 @@ function Read-MoodleVersionFile([string]$Path) {
     if ($raw -match '\$version\s*=\s*([0-9]+(?:\.[0-9]+)?)\s*;') {
         $result.version = $Matches[1]
     }
-    if ($raw -match '\$release\s*=\s*[\'"]([^\'"]+)[\'"]\s*;') {
+    if ($raw -match '\$release\s*=\s*[''"]([^''"]+)[''"]\s*;') {
         $result.release = $Matches[1]
     }
-    if ($raw -match '\$branch\s*=\s*[\'"]([^\'"]+)[\'"]\s*;') {
+    if ($raw -match '\$branch\s*=\s*[''"]([^''"]+)[''"]\s*;') {
         $result.branch = $Matches[1]
     }
     if ($raw -match '\$maturity\s*=\s*([A-Z0-9_]+)\s*;') {
